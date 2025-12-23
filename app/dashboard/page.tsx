@@ -35,6 +35,10 @@ export default function Dashboard() {
     setCurrentWordIndex((prev) => prev + 1);
   };
 
+  const handleWordIndexChange = (newIndex: number) => {
+    setCurrentWordIndex(newIndex);
+  };
+
   const handleLevelComplete = () => {
     const newCompleted = [...new Set([...completedLevels, currentLevel])];
     setCompletedLevels(newCompleted);
@@ -91,6 +95,7 @@ export default function Dashboard() {
                   wordIndex={currentWordIndex}
                   onWordComplete={handleWordComplete}
                   onLevelComplete={handleLevelComplete}
+                  onWordIndexChange={handleWordIndexChange}
                 />
               </motion.div>
             )}

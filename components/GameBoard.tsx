@@ -15,6 +15,7 @@ interface GameBoardProps {
   wordIndex: number;
   onWordComplete: () => void;
   onLevelComplete: () => void;
+  onWordIndexChange?: (newIndex: number) => void;
 }
 
 interface LetterItem {
@@ -28,7 +29,7 @@ interface LetterItem {
 
 const COLORS = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#FF9F1C", "#457B9D", "#9B59B6", "#F06292"];
 
-export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }: GameBoardProps) => {
+export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, onWordIndexChange }: GameBoardProps) => {
   const currentLevel = LEVELS.find((l) => l.level === level)!;
   const currentWordData = currentLevel.words[wordIndex];
   const word = currentWordData.word;
@@ -257,23 +258,35 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
           <div className="h-8 w-px bg-gray-200" />
           
           <div className="flex gap-2">
-            {currentLevel.words.map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "relative w-3 h-3 lg:w-4 lg:h-4 rounded-full transition-all duration-300",
-                  i < wordIndex 
-                    ? "bg-green-500 scale-110 shadow-lg shadow-green-200" 
-                    : i === wordIndex 
-                      ? "bg-blue-500 animate-pulse scale-125 shadow-lg shadow-blue-200" 
-                      : "bg-gray-200"
-                )}
-              >
-                {i < wordIndex && (
-                  <span className="absolute inset-0 flex items-center justify-center text-[8px]">✓</span>
-                )}
-              </div>
-            ))}
+            {currentLevel.words.map((_, i) => {
+              const isClickable = i <= wordIndex;
+              const isCompleted = i < wordIndex;
+              const isCurrent = i === wordIndex;
+              
+              return (
+                <button
+                  key={i}
+                  onClick={() => isClickable && onWordIndexChange?.(i)}
+                  disabled={!isClickable}
+                  className={cn(
+                    "relative w-6 h-6 lg:w-8 lg:h-8 rounded-full transition-all duration-300",
+                    isCompleted 
+                      ? "bg-green-500 scale-100 shadow-lg shadow-green-200 hover:scale-110 cursor-pointer" 
+                      : isCurrent 
+                        ? "bg-blue-500 animate-pulse scale-110 shadow-lg shadow-blue-200 cursor-pointer hover:scale-115" 
+                        : "bg-gray-200 cursor-not-allowed opacity-50",
+                    isClickable && "active:scale-95"
+                  )}
+                >
+                  {isCompleted && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] lg:text-xs text-white font-bold">✓</span>
+                  )}
+                  {isCurrent && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] lg:text-xs text-white font-black">{i + 1}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
           
           <div className="h-8 w-px bg-gray-200" />
