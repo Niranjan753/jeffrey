@@ -52,9 +52,10 @@ export function shuffleArray<T>(array: T[]): T[] {
 
 export function getRandomPosition() {
   // Random position within safe bounds for letters to be scattered
+  // Keep letters in the lower portion but with safe margins
   return {
-    x: Math.random() * 80 + 10, // 10% to 90%
-    y: Math.random() * 30 + 60, // 60% to 90% (bottom part of screen)
+    x: Math.random() * 70 + 15, // 15% to 85%
+    y: Math.random() * 25 + 55, // 55% to 80% (lower-middle, ensuring visibility)
   };
 }
 

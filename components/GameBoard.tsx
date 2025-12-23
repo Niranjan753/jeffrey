@@ -15,6 +15,7 @@ interface GameBoardProps {
   wordIndex: number;
   onWordComplete: () => void;
   onLevelComplete: () => void;
+  onWordIndexChange?: (newIndex: number) => void;
 }
 
 interface LetterItem {
@@ -28,7 +29,7 @@ interface LetterItem {
 
 const COLORS = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#FF9F1C", "#457B9D", "#9B59B6", "#F06292"];
 
-export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }: GameBoardProps) => {
+export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, onWordIndexChange }: GameBoardProps) => {
   const currentLevel = LEVELS.find((l) => l.level === level)!;
   const currentWordData = currentLevel.words[wordIndex];
   const word = currentWordData.word;
@@ -127,33 +128,60 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
   };
 
   return (
-    <div className="relative w-full h-[80vh] flex flex-col items-center justify-between p-8 overflow-hidden bg-white">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-pink-200 blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full bg-blue-200 blur-3xl animate-bounce" />
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 rounded-full bg-yellow-200 blur-2xl" />
-        <div className="absolute top-20 right-1/3 w-40 h-40 rounded-full bg-green-200 blur-3xl" />
+    <div className="relative w-full h-full min-h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
+      {/* Decorative background elements with better positioning */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-pink-200/30 blur-3xl" />
+        <div className="absolute top-20 right-10 w-48 h-48 rounded-full bg-blue-200/30 blur-3xl" />
+        <div className="absolute top-1/3 left-1/4 w-24 h-24 rounded-full bg-yellow-200/30 blur-2xl" />
+        <div className="absolute top-1/4 right-1/3 w-40 h-40 rounded-full bg-green-200/30 blur-3xl" />
+        
+        {/* Floating decorative elements */}
+        <motion.div 
+          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-32 right-20 text-6xl opacity-10"
+        >
+          ⭐
+        </motion.div>
+        <motion.div 
+          animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-40 left-32 text-5xl opacity-10"
+        >
+          🎨
+        </motion.div>
       </div>
 
-      <div className="absolute top-8 text-center w-full pointer-events-none">
-        <h2 className="text-2xl font-black text-gray-400 uppercase tracking-widest">
+      {/* Top Section with Title */}
+      <div className="relative z-10 w-full pt-8 pb-4 text-center pointer-events-none">
+        <motion.h2 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 uppercase tracking-wider mb-2"
+        >
           Arrange the letters!
-        </h2>
+        </motion.h2>
+        <div className="flex items-center justify-center gap-2 text-gray-400 text-sm font-bold">
+          <span>Drag and drop to spell</span>
+        </div>
       </div>
 
-      {/* Target Word Display */}
-      <div className="flex flex-wrap gap-3 lg:gap-4 items-center justify-center mt-24 lg:mt-32 px-4">
+      {/* Target Word Display - Centered */}
+      <div className="relative z-10 flex-shrink-0 flex flex-wrap gap-3 lg:gap-4 items-center justify-center px-4 py-8 mt-8">
         {word.split("").map((char, index) => (
-          <div
+          <motion.div
             key={`slot-${index}`}
             ref={(el) => { slotRefs.current[index] = el; }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: index * 0.1, type: "spring" }}
           >
             <WordSlot
               letter={char}
               isFilled={placedLetters[index] !== null}
             />
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -194,8 +222,8 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
         )}
       </AnimatePresence>
 
-      {/* Scattered Letters */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* Playing Area - This is where letters will be scattered */}
+      <div className="relative z-0 flex-grow w-full min-h-[400px] pointer-events-none">
         {letters.map((letter) => (
           <div key={letter.id}>
             {letter.status !== "correct" && (
@@ -213,21 +241,60 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
         ))}
       </div>
 
-      {/* Progress Indicator */}
-      <div className="mb-8 bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-md border border-gray-100 flex items-center gap-4">
-        <span className="text-xl font-bold text-gray-700">Level {level}</span>
-        <div className="flex gap-1">
-          {currentLevel.words.map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "w-3 h-3 rounded-full transition-all",
-                i < wordIndex ? "bg-green-500 scale-110" : i === wordIndex ? "bg-blue-500 animate-pulse" : "bg-gray-200"
-              )}
-            />
-          ))}
-        </div>
-        <span className="text-sm font-medium text-gray-500">Word {wordIndex + 1}/5</span>
+      {/* Progress Indicator - Bottom fixed with proper spacing */}
+      <div className="relative z-10 w-full flex justify-center pb-8 pt-4 flex-shrink-0">
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="bg-white/90 backdrop-blur-md px-6 lg:px-8 py-3 lg:py-4 rounded-3xl shadow-xl border-2 border-gray-100 flex items-center gap-4 lg:gap-6"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <span className="text-white font-black text-lg">{level}</span>
+            </div>
+            <span className="text-sm font-bold text-gray-500 uppercase tracking-wider hidden lg:block">Level</span>
+          </div>
+          
+          <div className="h-8 w-px bg-gray-200" />
+          
+          <div className="flex gap-2">
+            {currentLevel.words.map((_, i) => {
+              const isClickable = i <= wordIndex;
+              const isCompleted = i < wordIndex;
+              const isCurrent = i === wordIndex;
+              
+              return (
+                <button
+                  key={i}
+                  onClick={() => isClickable && onWordIndexChange?.(i)}
+                  disabled={!isClickable}
+                  className={cn(
+                    "relative w-6 h-6 lg:w-8 lg:h-8 rounded-full transition-all duration-300",
+                    isCompleted 
+                      ? "bg-green-500 scale-100 shadow-lg shadow-green-200 hover:scale-110 cursor-pointer" 
+                      : isCurrent 
+                        ? "bg-blue-500 animate-pulse scale-110 shadow-lg shadow-blue-200 cursor-pointer hover:scale-115" 
+                        : "bg-gray-200 cursor-not-allowed opacity-50",
+                    isClickable && "active:scale-95"
+                  )}
+                >
+                  {isCompleted && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] lg:text-xs text-white font-bold">✓</span>
+                  )}
+                  {isCurrent && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] lg:text-xs text-white font-black">{i + 1}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          
+          <div className="h-8 w-px bg-gray-200" />
+          
+          <span className="text-sm lg:text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            {wordIndex + 1}/{currentLevel.words.length}
+          </span>
+        </motion.div>
       </div>
     </div>
   );

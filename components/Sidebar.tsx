@@ -11,7 +11,7 @@ import {
   User,
   LayoutDashboard
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -19,12 +19,13 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Game", href: "/dashboard" },
-    { icon: Trophy, label: "Achievements", href: "#" },
-    { icon: User, label: "Profile", href: "#" },
-    { icon: Settings, label: "Settings", href: "#" },
+    { icon: Trophy, label: "Achievements", href: "/achievements" },
+    { icon: User, label: "Profile", href: "/profile" },
+    { icon: Settings, label: "Settings", href: "/settings" },
   ];
 
   const handleLogout = async () => {
@@ -79,20 +80,23 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-grow p-4 space-y-2">
-          {menuItems.map((item) => (
-            <Link key={item.label} href={item.href}>
-              <div
-                className={cn(
-                  "w-full flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer group",
-                  isCollapsed ? "justify-center" : "justify-start",
-                  item.href === "/dashboard" ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50 hover:text-gray-600"
-                )}
-              >
-                <item.icon size={22} className="flex-shrink-0" />
-                {!isCollapsed && <span className="font-bold text-sm">{item.label}</span>}
-              </div>
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link key={item.label} href={item.href}>
+                <div
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer group",
+                    isCollapsed ? "justify-center" : "justify-start",
+                    isActive ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                  )}
+                >
+                  <item.icon size={22} className="flex-shrink-0" />
+                  {!isCollapsed && <span className="font-bold text-sm">{item.label}</span>}
+                </div>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Sidebar Footer */}
@@ -179,19 +183,22 @@ export function Sidebar() {
               </div>
 
               <nav className="flex-grow px-4 py-6 space-y-2">
-                {menuItems.map((item) => (
-                  <Link key={item.label} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
-                    <div
-                      className={cn(
-                        "w-full flex items-center gap-4 p-4 rounded-2xl font-bold transition-all",
-                        item.href === "/dashboard" ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50"
-                      )}
-                    >
-                      <item.icon size={24} />
-                      <span>{item.label}</span>
-                    </div>
-                  </Link>
-                ))}
+                {menuItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link key={item.label} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                      <div
+                        className={cn(
+                          "w-full flex items-center gap-4 p-4 rounded-2xl font-bold transition-all",
+                          isActive ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50"
+                        )}
+                      >
+                        <item.icon size={24} />
+                        <span>{item.label}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </nav>
 
               <div className="p-6 border-t border-gray-50">
