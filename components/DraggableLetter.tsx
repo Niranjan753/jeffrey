@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, PanInfo } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn, speak } from "@/lib/utils";
 
 interface DraggableLetterProps {
@@ -24,15 +24,31 @@ export const DraggableLetter = ({
   color,
 }: DraggableLetterProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const [initialRotation] = useState(() => Math.random() * 40 - 20); // Random rotation between -20 and 20
   
-  const handleDragStart = () => {
-    setIsDragging(true);
-    speak(letter.toLowerCase());
-  };
+  // Handle the repeating pronunciation logic
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if ((isPressed || isDragging) && status !== "correct") {
+      // Speak immediately
+      speak(letter.toLowerCase());
+      
+      // Then repeat every 2 seconds
+      interval = setInterval(() => {
+        speak(letter.toLowerCase());
+      }, 2000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPressed, isDragging, letter, status]);
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
+    setIsPressed(false);
     onDrop(id, info.point.x, info.point.y);
   };
 
@@ -40,9 +56,11 @@ export const DraggableLetter = ({
     <motion.div
       drag
       dragMomentum={false}
-      onDragStart={handleDragStart}
+      onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
-      onPointerDown={() => speak(letter.toLowerCase())}
+      onPointerDown={() => setIsPressed(true)}
+      onPointerUp={() => setIsPressed(false)}
+      onPointerCancel={() => setIsPressed(false)}
       animate={
         status === "correct"
           ? { scale: 1, opacity: 1, rotate: 0 }
