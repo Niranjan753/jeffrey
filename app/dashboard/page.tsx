@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GameBoard } from "@/components/GameBoard";
-import { LevelSelector } from "@/components/LevelSelector";
+import { LevelMap } from "@/components/LevelMap";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { MusicControl } from "@/components/MusicControl";
@@ -62,9 +62,9 @@ export default function Dashboard() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="min-h-full flex items-center justify-center"
+                className="w-full h-full"
               >
-                <LevelSelector
+                <LevelMap
                   completedLevels={completedLevels}
                   onSelectLevel={handleSelectLevel}
                 />
