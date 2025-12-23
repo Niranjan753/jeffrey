@@ -53,6 +53,16 @@ export function shuffleArray<T>(array: T[]): T[] {
 export function getRandomPosition() {
   // Random position within safe bounds for letters to be scattered
   // Keep letters in the lower portion but with safe margins
+  // More constrained for mobile devices
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
+  if (isMobile) {
+    return {
+      x: Math.random() * 60 + 20, // 20% to 80% (more centered on mobile)
+      y: Math.random() * 20 + 50, // 50% to 70% (higher up on mobile)
+    };
+  }
+  
   return {
     x: Math.random() * 70 + 15, // 15% to 85%
     y: Math.random() * 25 + 55, // 55% to 80% (lower-middle, ensuring visibility)
