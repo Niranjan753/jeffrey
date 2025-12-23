@@ -128,7 +128,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
   };
 
   return (
-    <div className="relative w-full h-screen max-h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 overflow-hidden touch-none">
+    <div className="relative w-full h-[100dvh] flex flex-col items-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 overflow-hidden touch-none">
       {/* Decorative background elements with better positioning */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-pink-200/30 blur-3xl" />
@@ -154,11 +154,11 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       </div>
 
       {/* Top Section with Title */}
-      <div className="relative z-10 w-full pt-1 md:pt-3 pb-0.5 md:pb-2 text-center pointer-events-none px-2 flex-shrink-0">
+      <div className="relative z-10 w-full pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-2 md:pb-3 text-center pointer-events-none px-2 flex-shrink-0">
         <motion.h2 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-[9px] sm:text-xs md:text-lg lg:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 uppercase tracking-wide sm:tracking-wider"
+          className="text-sm sm:text-base md:text-xl lg:text-3xl font-black text-purple-600 uppercase tracking-wide"
         >
           Arrange the letters!
         </motion.h2>
@@ -168,7 +168,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       </div>
 
       {/* Target Word Display - Centered */}
-      <div className="relative z-10 flex-shrink-0 flex flex-wrap gap-1 sm:gap-1.5 md:gap-3 lg:gap-4 items-center justify-center px-2 sm:px-4 py-1 sm:py-2 md:py-4 max-w-[95%] sm:max-w-full">
+      <div className="relative z-10 flex-shrink-0 flex flex-wrap gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 items-center justify-center px-2 sm:px-4 py-2 sm:py-3 md:py-4 max-w-[95%] sm:max-w-full">
         {word.split("").map((char, index) => (
           <motion.div
             key={`slot-${index}`}
@@ -236,7 +236,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       </AnimatePresence>
 
       {/* Playing Area - This is where letters will be scattered */}
-      <div className="relative z-0 flex-1 min-h-0 w-full pointer-events-none px-2 md:px-4 flex items-center justify-center">
+      <div className="relative z-0 flex-1 min-h-0 w-full pointer-events-none px-2 md:px-4 pb-16 sm:pb-20 md:pb-24 flex items-center justify-center">
         <div className="relative w-full h-full max-w-2xl">
           {letters.map((letter) => (
             <div key={letter.id}>
@@ -257,23 +257,23 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       </div>
 
       {/* Progress Indicator - Bottom fixed with proper spacing */}
-      <div className="relative z-10 w-full flex justify-center pb-1.5 sm:pb-3 md:pb-5 pt-0.5 sm:pt-1.5 md:pt-2.5 flex-shrink-0 px-2 sm:px-4">
+      <div className="fixed bottom-0 left-0 right-0 z-50 w-full flex justify-center pb-3 sm:pb-4 md:pb-5 pt-2 sm:pt-2.5 md:pt-3 px-2 sm:px-4 bg-gradient-to-t from-pink-50 via-pink-50/80 to-transparent pointer-events-none">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white/90 backdrop-blur-md px-1.5 sm:px-3 md:px-5 lg:px-7 py-0.5 sm:py-1.5 md:py-2.5 lg:py-3.5 rounded-md sm:rounded-xl md:rounded-2xl shadow-sm sm:shadow-md md:shadow-lg border border-gray-100 sm:border-2 flex items-center gap-1 sm:gap-2 md:gap-4 lg:gap-6 will-change-transform max-w-full overflow-hidden"
+          className="bg-white/95 backdrop-blur-md px-2.5 sm:px-4 md:px-5 lg:px-7 py-1.5 sm:py-2 md:py-2.5 lg:py-3.5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-md sm:shadow-lg md:shadow-xl border-2 border-gray-100 sm:border-2 flex items-center gap-1.5 sm:gap-2.5 md:gap-4 lg:gap-6 will-change-transform max-w-full overflow-hidden pointer-events-auto"
         >
-          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
-            <div className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-sm sm:rounded-md md:rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm flex-shrink-0">
-              <span className="text-white font-black text-[8px] sm:text-xs md:text-sm">{level}</span>
+          <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-9 md:h-9 rounded-md sm:rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md flex-shrink-0">
+              <span className="text-white font-black text-[10px] sm:text-xs md:text-sm">{level}</span>
             </div>
-            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide hidden md:block">Lv</span>
+            <span className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide hidden md:block">Level</span>
           </div>
           
-          <div className="h-3 sm:h-4 md:h-6 w-px bg-gray-200 flex-shrink-0" />
+          <div className="h-4 sm:h-5 md:h-7 w-px bg-gray-200 flex-shrink-0" />
           
-          <div className="flex gap-0.5 sm:gap-1 md:gap-1.5 flex-wrap justify-center">
+          <div className="flex gap-1 sm:gap-1.5 md:gap-2 flex-wrap justify-center">
             {currentLevel.words.map((_, i) => {
               const isClickable = i <= wordIndex;
               const isCompleted = i < wordIndex;
@@ -285,7 +285,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
                   onClick={() => isClickable && onWordIndexChange?.(i)}
                   disabled={!isClickable}
                   className={cn(
-                    "relative w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full transition-all duration-300 ease-out flex-shrink-0",
+                    "relative w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full transition-all duration-300 ease-out flex-shrink-0",
                     isCompleted 
                       ? "bg-green-500 scale-100 shadow-sm shadow-green-200 hover:scale-110 cursor-pointer" 
                       : isCurrent 
@@ -295,7 +295,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
                   )}
                 >
                   {isCompleted && (
-                    <span className="absolute inset-0 flex items-center justify-center text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] text-white font-bold">✓</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs text-white font-bold">✓</span>
                   )}
                   {isCurrent && (
                     <span className="absolute inset-0 flex items-center justify-center text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] text-white font-black">{i + 1}</span>

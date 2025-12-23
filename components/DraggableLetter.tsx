@@ -94,8 +94,8 @@ export const DraggableLetter = ({
         backgroundColor: status === "correct" ? "#3B82F6" : status === "incorrect" ? "#EF4444" : color,
       }}
       className={cn(
-        "absolute flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-md sm:rounded-lg md:rounded-xl lg:rounded-2xl cursor-grab active:cursor-grabbing text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-white shadow-[0_3px_0_rgba(0,0,0,0.15)] sm:shadow-[0_4px_0_rgba(0,0,0,0.15)] md:shadow-[0_6px_0_rgba(0,0,0,0.15)] select-none z-10 pointer-events-auto will-change-transform touch-none",
-        "before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:right-0.5 before:h-1/2 before:bg-white/30 before:rounded-t-md sm:before:rounded-t-lg before:pointer-events-none",
+        "absolute flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-18 md:h-18 lg:w-22 lg:h-22 rounded-lg sm:rounded-xl md:rounded-2xl lg:rounded-3xl cursor-grab active:cursor-grabbing text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white shadow-[0_3px_0_rgba(0,0,0,0.15)] sm:shadow-[0_4px_0_rgba(0,0,0,0.15)] md:shadow-[0_6px_0_rgba(0,0,0,0.15)] select-none z-10 pointer-events-auto will-change-transform touch-none",
+        "before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:right-0.5 before:h-1/2 before:bg-white/30 before:rounded-t-lg sm:before:rounded-t-xl before:pointer-events-none",
         status === "correct" && "cursor-default pointer-events-none shadow-none translate-y-1.5",
         status === "incorrect" && "animate-shake",
         isDragging && "shadow-2xl ring-4 ring-white/50 scale-110 z-50"

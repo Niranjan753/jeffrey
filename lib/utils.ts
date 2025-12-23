@@ -59,13 +59,13 @@ export function getRandomPosition() {
   if (isMobile) {
     return {
       x: Math.random() * 50 + 25, // 25% to 75% (more centered on mobile)
-      y: Math.random() * 30 + 45, // 45% to 75% (lower half, more room for slots above)
+      y: Math.random() * 30 + 25, // 35% to 65% (middle area, avoiding bottom progress bar)
     };
   }
   
   return {
     x: Math.random() * 70 + 15, // 15% to 85%
-    y: Math.random() * 25 + 60, // 60% to 85% (lower portion, ensuring visibility)
+    y: Math.random() * 30 + 50, // 50% to 80% (middle to lower, avoiding bottom)
   };
 }
 
