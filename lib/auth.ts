@@ -1,23 +1,10 @@
 import { betterAuth } from 'better-auth';
-import { Pool } from 'pg';
-
-const getDatabase = () => {
-    // Check if we have a Postgres DATABASE_URL (for production/deployment)
-    if (process.env.DATABASE_URL) {
-        return new Pool({
-            connectionString: process.env.DATABASE_URL,
-            ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
-        });
-    }
-    
-    // FALLBACK: Use In-Memory storage for local development.
-    // This fixes the "bun:sqlite" and "better-sqlite3" errors.
-    // Note: Users created locally will be lost when the server restarts.
-    return undefined;
-};
 
 export const auth = betterAuth({
-    database: getDatabase(),
+    database: {
+        provider: "postgres",
+        url: process.env.DATABASE_URL || "",
+    },
     emailAndPassword: {
         enabled: true,
         async sendResetPassword(data, request) {
@@ -34,11 +21,18 @@ export const auth = betterAuth({
             clientSecret: process.env.GITHUB_CLIENT_SECRET || "dummy"
         }
     },
-    // This is required for deployment to work correctly
+    // Production secret
     secret: process.env.BETTER_AUTH_SECRET || "a-very-long-and-secure-random-secret-for-development",
-    baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    
+    // Automatically detect the current URL for Vercel Previews and Production
+    baseURL: process.env.BETTER_AUTH_URL || 
+             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) || 
+             process.env.NEXT_PUBLIC_APP_URL || 
+             "http://localhost:3000",
+
     trustedOrigins: [
         process.env.NEXT_PUBLIC_APP_URL!,
+        process.env.BETTER_AUTH_URL!,
         `https://${process.env.VERCEL_URL}`,
         "https://jeffrey-alpha.vercel.app",
         "http://localhost:3000",
