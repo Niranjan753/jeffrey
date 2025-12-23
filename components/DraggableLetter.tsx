@@ -2,7 +2,7 @@
 
 import { motion, PanInfo } from "framer-motion";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, speak } from "@/lib/utils";
 
 interface DraggableLetterProps {
   letter: string;
@@ -26,6 +26,11 @@ export const DraggableLetter = ({
   const [isDragging, setIsDragging] = useState(false);
   const [initialRotation] = useState(() => Math.random() * 40 - 20); // Random rotation between -20 and 20
   
+  const handleDragStart = () => {
+    setIsDragging(true);
+    speak(letter.toLowerCase());
+  };
+
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
     onDrop(id, info.point.x, info.point.y);
@@ -35,8 +40,9 @@ export const DraggableLetter = ({
     <motion.div
       drag
       dragMomentum={false}
-      onDragStart={() => setIsDragging(true)}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onPointerDown={() => speak(letter.toLowerCase())}
       animate={
         status === "correct"
           ? { scale: 1, opacity: 1, rotate: 0 }

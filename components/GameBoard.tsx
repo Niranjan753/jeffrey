@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { DraggableLetter } from "./DraggableLetter";
 import { WordSlot } from "./WordSlot";
 import { LEVELS } from "@/data/levels";
-import { shuffleArray, getRandomPosition, cn } from "@/lib/utils";
+import { shuffleArray, getRandomPosition, cn, speak } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
 interface GameBoardProps {
@@ -107,6 +107,8 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
       origin: { y: 0.6 },
       colors: COLORS,
     });
+
+    speak(word);
 
     setTimeout(() => {
       if (wordIndex === currentLevel.words.length - 1) {
