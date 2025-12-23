@@ -10,10 +10,11 @@ import { playLevelWinSound } from "@/lib/utils";
 import { Sidebar } from "@/components/Sidebar";
 
 export default function Dashboard() {
-  const [gameState, setGameState] = useState<"menu" | "playing" | "level_complete">("menu");
+  const [gameState, setGameState] = useState<"menu" | "playing" | "level_complete" | "animating_to_next">("menu");
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [completedLevels, setCompletedLevels] = useState<number[]>([]);
+  const [shouldScrollToLevel, setShouldScrollToLevel] = useState<number | null>(null);
 
   // Load progress from localStorage
   useEffect(() => {
@@ -44,11 +45,29 @@ export default function Dashboard() {
     setCompletedLevels(newCompleted);
     localStorage.setItem("word-game-progress", JSON.stringify(newCompleted));
     playLevelWinSound();
-    setGameState("level_complete");
+    
+    // First, go back to map with fade transition
+    setGameState("animating_to_next");
+    
+    // Trigger scroll animation to next level
+    setTimeout(() => {
+      setShouldScrollToLevel(currentLevel + 1);
+    }, 600);
+    
+    // Show completion overlay after scroll animation completes
+    setTimeout(() => {
+      setGameState("level_complete");
+      setShouldScrollToLevel(null);
+    }, 3200);
   };
 
   const goBackToMenu = () => {
     setGameState("menu");
+    // Scroll to current level when returning to menu
+    setTimeout(() => {
+      setShouldScrollToLevel(Math.max(1, ...completedLevels) + 1);
+      setTimeout(() => setShouldScrollToLevel(null), 1000);
+    }, 100);
   };
 
   return (
@@ -60,7 +79,7 @@ export default function Dashboard() {
         
         <div className="flex-grow w-full overflow-y-auto overflow-x-hidden pt-16 md:pt-0 scroll-smooth">
           <AnimatePresence mode="wait">
-            {gameState === "menu" && (
+            {(gameState === "menu" || gameState === "animating_to_next") && (
               <motion.div
                 key="menu"
                 initial={{ opacity: 0 }}
@@ -71,6 +90,7 @@ export default function Dashboard() {
                 <LevelMap
                   completedLevels={completedLevels}
                   onSelectLevel={handleSelectLevel}
+                  scrollToLevel={shouldScrollToLevel}
                 />
               </motion.div>
             )}
@@ -103,10 +123,11 @@ export default function Dashboard() {
             {gameState === "level_complete" && (
               <motion.div
                 key="complete"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 md:absolute flex flex-col items-center justify-center bg-white z-[100] p-8 text-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed inset-0 md:absolute flex flex-col items-center justify-center bg-white/95 backdrop-blur-md z-[100] p-8 text-center"
               >
                 <motion.div
                   initial={{ scale: 0, rotate: -10 }}
