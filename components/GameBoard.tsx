@@ -143,7 +143,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
       </div>
 
       {/* Target Word Display */}
-      <div className="flex gap-4 items-center justify-center mt-20">
+      <div className="flex flex-wrap gap-3 lg:gap-4 items-center justify-center mt-24 lg:mt-32 px-4">
         {word.split("").map((char, index) => (
           <div
             key={`slot-${index}`}
