@@ -1,0 +1,183 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { GameBoard } from "@/components/GameBoard";
+import { LevelSelector } from "@/components/LevelSelector";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, LogOut } from "lucide-react";
+import { useSession, signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+
+export default function Dashboard() {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  const [gameState, setGameState] = useState<"menu" | "playing" | "level_complete">("menu");
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [completedLevels, setCompletedLevels] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push("/sign-in");
+    }
+  }, [session, isPending, router]);
+
+  // Load progress from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("word-game-progress");
+      if (saved) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCompletedLevels(JSON.parse(saved));
+      }
+    }
+  }, []);
+
+  const handleSelectLevel = (level: number) => {
+    setCurrentLevel(level);
+    setCurrentWordIndex(0);
+    setGameState("playing");
+  };
+
+  const handleWordComplete = () => {
+    setCurrentWordIndex((prev) => prev + 1);
+  };
+
+  const handleLevelComplete = () => {
+    const newCompleted = [...new Set([...completedLevels, currentLevel])];
+    setCompletedLevels(newCompleted);
+    localStorage.setItem("word-game-progress", JSON.stringify(newCompleted));
+    setGameState("level_complete");
+  };
+
+  const goBackToMenu = () => {
+    setGameState("menu");
+  };
+
+  if (isPending || !session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-white font-[family-name:var(--font-geist-sans)]">
+      {/* User Header */}
+      <div className="absolute top-8 right-8 flex items-center gap-4 z-50">
+        <div className="text-right">
+          <p className="text-sm font-bold text-gray-700">{session.user.name}</p>
+          <p className="text-xs text-gray-400">{session.user.email}</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={async () => {
+            await signOut();
+            router.push("/");
+          }}
+          className="rounded-full h-10 w-10 p-0"
+        >
+          <LogOut size={18} className="text-gray-500" />
+        </Button>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {gameState === "menu" && (
+          <motion.div
+            key="menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <LevelSelector
+              completedLevels={completedLevels}
+              onSelectLevel={handleSelectLevel}
+            />
+          </motion.div>
+        )}
+
+        {gameState === "playing" && (
+          <motion.div
+            key="playing"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="relative"
+          >
+            <button
+              onClick={goBackToMenu}
+              className="absolute top-8 left-8 p-4 rounded-full bg-gray-50 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all z-50 shadow-sm"
+            >
+              <ChevronLeft size={32} />
+            </button>
+            <GameBoard
+              key={`${currentLevel}-${currentWordIndex}`}
+              level={currentLevel}
+              wordIndex={currentWordIndex}
+              onWordComplete={handleWordComplete}
+              onLevelComplete={handleLevelComplete}
+            />
+          </motion.div>
+        )}
+
+        {gameState === "level_complete" && (
+          <motion.div
+            key="complete"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex flex-col items-center justify-center bg-white z-[100] p-8 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", damping: 10, stiffness: 100 }}
+              className="mb-8"
+            >
+              <div className="relative">
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 10, -10, 0]
+                  }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="text-[120px] mb-4"
+                >
+                  🏆
+                </motion.div>
+                <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full -z-10" />
+              </div>
+              <h2 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-2 drop-shadow-sm">
+                FANTASTIC!
+              </h2>
+              <p className="text-2xl font-bold text-gray-400">You mastered Level {currentLevel}!</p>
+            </motion.div>
+
+            <div className="flex gap-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={goBackToMenu}
+                className="px-10 py-5 bg-gray-100 text-gray-500 rounded-3xl text-2xl font-black hover:bg-gray-200 transition-all shadow-xl border-b-4 border-gray-300"
+              >
+                MENU
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleSelectLevel(currentLevel + 1)}
+                className="px-12 py-5 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-3xl text-2xl font-black hover:from-blue-500 hover:to-blue-700 transition-all shadow-xl shadow-blue-200 border-b-4 border-blue-800"
+              >
+                NEXT LEVEL
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
+  );
+}
+
