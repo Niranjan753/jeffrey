@@ -58,7 +58,7 @@ export default function Dashboard() {
       <main className="flex-grow relative flex flex-col min-w-0 h-full overflow-hidden">
         <MusicControl />
         
-        <div className="flex-grow w-full overflow-y-auto pt-16 md:pt-0">
+        <div className="flex-grow w-full overflow-y-auto overflow-x-hidden pt-16 md:pt-0 scroll-smooth">
           <AnimatePresence mode="wait">
             {gameState === "menu" && (
               <motion.div
