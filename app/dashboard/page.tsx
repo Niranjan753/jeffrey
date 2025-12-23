@@ -46,7 +46,7 @@ export default function Dashboard() {
     localStorage.setItem("word-game-progress", JSON.stringify(newCompleted));
     playLevelWinSound();
     
-    // First, go back to map with fade transition
+    // Go back to map and start animations
     setGameState("animating_to_next");
     
     // Trigger scroll and avatar animation to next level
@@ -54,11 +54,15 @@ export default function Dashboard() {
       setShouldScrollToLevel(currentLevel + 1);
     }, 400);
     
-    // Show completion overlay after animations complete
+    // Clear scroll trigger after animation completes
+    setTimeout(() => {
+      setShouldScrollToLevel(null);
+    }, 2200);
+    
+    // Show completion overlay AFTER map animation is done
     setTimeout(() => {
       setGameState("level_complete");
-      setShouldScrollToLevel(null);
-    }, 2800);
+    }, 2500);
   };
 
   const goBackToMenu = () => {
@@ -127,51 +131,61 @@ export default function Dashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="fixed inset-0 md:absolute flex flex-col items-center justify-center bg-white/95 backdrop-blur-md z-[100] p-8 text-center"
+                className="fixed inset-0 md:absolute flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 z-[100] p-8 text-center"
               >
                 <motion.div
-                  initial={{ scale: 0, rotate: -10 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", damping: 10, stiffness: 100 }}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.1 }}
                   className="mb-8"
                 >
                   <div className="relative">
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 10, -10, 0]
-                      }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      className="text-[120px] mb-4"
-                    >
+                    <div className="text-[120px] mb-4">
                       🏆
-                    </motion.div>
+                    </div>
                     <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full -z-10" />
                   </div>
-                  <h2 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-2 drop-shadow-sm uppercase">
+                  <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-2 uppercase"
+                  >
                     FANTASTIC!
-                  </h2>
-                  <p className="text-2xl font-bold text-gray-400">You mastered Level {currentLevel}!</p>
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-xl md:text-2xl font-bold text-gray-600"
+                  >
+                    You mastered Level {currentLevel}!
+                  </motion.p>
                 </motion.div>
 
-                <div className="flex flex-col sm:flex-row gap-6">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={goBackToMenu}
-                    className="px-10 py-5 bg-gray-100 text-gray-500 rounded-3xl text-2xl font-black hover:bg-gray-200 transition-all shadow-xl border-b-4 border-gray-300"
-                  >
-                    MENU
-                  </motion.button>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex flex-col sm:flex-row gap-4"
+                >
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSelectLevel(currentLevel + 1)}
-                    className="px-12 py-5 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-3xl text-2xl font-black hover:from-blue-500 hover:to-blue-700 transition-all shadow-xl shadow-blue-200 border-b-4 border-blue-800"
+                    className="px-12 py-5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-3xl text-2xl font-black hover:from-blue-600 hover:to-blue-700 transition-all shadow-xl shadow-blue-300/50 border-b-4 border-blue-800"
                   >
                     NEXT LEVEL
                   </motion.button>
-                </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={goBackToMenu}
+                    className="px-10 py-5 bg-white text-gray-600 rounded-3xl text-xl font-black hover:bg-gray-50 transition-all shadow-xl border-b-4 border-gray-300"
+                  >
+                    MENU
+                  </motion.button>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
