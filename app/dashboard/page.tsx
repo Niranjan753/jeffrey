@@ -5,32 +5,21 @@ import { GameBoard } from "@/components/GameBoard";
 import { LevelSelector } from "@/components/LevelSelector";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { MusicControl } from "@/components/MusicControl";
 import { playLevelWinSound } from "@/lib/utils";
 import { Sidebar } from "@/components/Sidebar";
 
 export default function Dashboard() {
-  const { data: session, isPending } = useSession();
-  const router = useRouter();
   const [gameState, setGameState] = useState<"menu" | "playing" | "level_complete">("menu");
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [completedLevels, setCompletedLevels] = useState<number[]>([]);
-
-  useEffect(() => {
-    if (!isPending && !session) {
-      router.push("/sign-in");
-    }
-  }, [session, isPending, router]);
 
   // Load progress from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("word-game-progress");
       if (saved) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCompletedLevels(JSON.parse(saved));
       }
     }
@@ -57,14 +46,6 @@ export default function Dashboard() {
   const goBackToMenu = () => {
     setGameState("menu");
   };
-
-  if (isPending || !session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">

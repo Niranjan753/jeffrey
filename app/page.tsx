@@ -40,17 +40,10 @@ export default function LandingPage() {
           <span className="text-xl lg:text-3xl font-black tracking-tighter text-gray-900 group-hover:text-blue-600 transition-colors uppercase lg:normal-case">WORD MAGIC</span>
         </div>
         <div className="flex gap-2 lg:gap-6 items-center">
-          <Link href="/sign-in?demo=true">
-            <Button variant="ghost" className="font-black text-blue-500 hover:text-blue-600 hover:bg-blue-50 text-sm lg:text-lg px-2 lg:px-4 hidden sm:flex items-center gap-2">
-              <PlayCircle size={18} />
-              Try Demo
+          <Link href="/dashboard">
+            <Button variant="ghost" className="font-black text-blue-500 hover:text-blue-600 hover:bg-blue-50 text-sm lg:text-lg px-2 lg:px-4 flex items-center gap-2">
+              PLAY NOW!
             </Button>
-          </Link>
-          <Link href="/sign-in">
-            <Button variant="ghost" className="font-black text-gray-500 hover:text-blue-600 hover:bg-transparent text-sm lg:text-lg px-2 lg:px-4">Login</Button>
-          </Link>
-          <Link href="/sign-up">
-            <Button className="bg-blue-500 hover:bg-blue-600 font-black rounded-full px-4 lg:px-8 h-10 lg:h-12 text-sm lg:text-lg shadow-xl shadow-blue-200 hover:-translate-y-1 transition-all">Sign Up</Button>
           </Link>
         </div>
       </nav>
@@ -101,7 +94,7 @@ export default function LandingPage() {
               transition={{ delay: 0.3 }}
               className="flex flex-col items-center lg:items-start space-y-6"
             >
-              <Link href="/sign-up" className="w-full sm:w-auto">
+              <Link href="/dashboard" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r cursor-pointer from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xl lg:text-2xl font-black rounded-[1.5rem] lg:rounded-[2rem] h-16 lg:h-20 px-8 lg:px-12 shadow-2xl shadow-blue-300 border-b-[4px] lg:border-b-[6px] border-blue-800 active:border-b-0 active:translate-y-1.5 transition-all group">
                   START PLAYING!
                   <motion.span 

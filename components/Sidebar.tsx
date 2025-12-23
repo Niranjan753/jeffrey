@@ -11,16 +11,13 @@ import {
   User,
   LayoutDashboard
 } from "lucide-react";
-import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import Image from "next/image";
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { data: session } = useSession();
   const router = useRouter();
 
   const menuItems = [
@@ -31,7 +28,6 @@ export function Sidebar() {
   ];
 
   const handleLogout = async () => {
-    await signOut();
     router.push("/");
   };
 
@@ -70,16 +66,12 @@ export function Sidebar() {
             isCollapsed ? "justify-center" : "justify-start"
           )}>
             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm overflow-hidden relative">
-              {session?.user.image ? (
-                <Image src={session.user.image} alt="profile" fill className="object-cover" />
-              ) : (
-                <User size={20} className="text-blue-500" />
-              )}
+              <User size={20} className="text-blue-500" />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-bold text-gray-700 truncate">{session?.user.name}</span>
-                <span className="text-xs text-gray-400 truncate">{session?.user.email}</span>
+                <span className="text-sm font-bold text-gray-700 truncate">Explorer</span>
+                <span className="text-xs text-gray-400 truncate">guest@wordmagic.com</span>
               </div>
             )}
           </div>
@@ -177,15 +169,11 @@ export function Sidebar() {
               <div className="px-6 py-4">
                 <div className="flex items-center gap-4 p-3 rounded-2xl bg-gray-50/50 border border-gray-100/50">
                   <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden relative">
-                    {session?.user.image ? (
-                      <Image src={session.user.image} alt="profile" fill className="object-cover" />
-                    ) : (
-                      <User size={24} className="text-blue-500" />
-                    )}
+                    <User size={24} className="text-blue-500" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-black text-gray-800">{session?.user.name}</span>
-                    <span className="text-xs text-gray-400">{session?.user.email}</span>
+                    <span className="font-black text-gray-800">Explorer</span>
+                    <span className="text-xs text-gray-400">guest@wordmagic.com</span>
                   </div>
                 </div>
               </div>
