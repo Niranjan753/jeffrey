@@ -152,7 +152,7 @@ function SignInContent() {
                 <Checkbox
                   id="remember"
                   className="rounded-md border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
-                  onCheckedChange={(checked) => setRememberMe(!!checked)}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <Label htmlFor="remember" className="text-sm font-bold text-gray-500 cursor-pointer">Remember me</Label>
               </div>
@@ -165,8 +165,10 @@ function SignInContent() {
                   await signIn.email(
                     { email, password },
                     {
+                     
                       onRequest: () => setLoading(true),
                       onResponse: () => setLoading(false),
+                       //@ts-ignore
                       onError: (ctx) => toast.error(ctx.error.message),
                       onSuccess: () => {
                         toast.success("Successfully logged in!");
