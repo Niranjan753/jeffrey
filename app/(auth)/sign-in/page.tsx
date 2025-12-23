@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,10 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4 relative">
+      <Link href="/" className="absolute top-8 left-8 p-4 rounded-full bg-white text-gray-400 hover:text-gray-600 transition-all z-50 shadow-sm border border-gray-100">
+        <ChevronLeft size={32} />
+      </Link>
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
@@ -84,10 +87,10 @@ export default function SignIn() {
                       password
                   },
                   {
-                    onRequest: (ctx) => {
+                    onRequest: () => {
                       setLoading(true);
                     },
-                    onResponse: (ctx) => {
+                    onResponse: () => {
                       setLoading(false);
                     },
                   },
@@ -119,10 +122,10 @@ export default function SignIn() {
                         callbackURL: "/dashboard"
                       },
                       {
-                        onRequest: (ctx) => {
+                        onRequest: () => {
                            setLoading(true);
                         },
-                        onResponse: (ctx) => {
+                        onResponse: () => {
                            setLoading(false);
                         },
                        },
@@ -150,10 +153,10 @@ export default function SignIn() {
                         callbackURL: "/dashboard"
                       },
                       {
-                        onRequest: (ctx) => {
+                        onRequest: () => {
                            setLoading(true);
                         },
-                        onResponse: (ctx) => {
+                        onResponse: () => {
                            setLoading(false);
                         },
                        },

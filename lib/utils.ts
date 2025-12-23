@@ -31,6 +31,16 @@ export function speak(text: string) {
   }
 }
 
+export function playLevelWinSound() {
+  if (typeof window !== "undefined") {
+    const audio = new Audio("/level.mp3");
+    audio.playbackRate = 2.0;
+    audio.play().catch(() => {
+      // Silent catch for autoplay blocks
+    });
+  }
+}
+
 export function shuffleArray<T>(array: T[]): T[] {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {

@@ -86,7 +86,7 @@ export const DraggableLetter = ({
         backgroundColor: status === "correct" ? "#3B82F6" : status === "incorrect" ? "#EF4444" : color,
       }}
       className={cn(
-        "absolute flex items-center justify-center w-16 h-16 rounded-2xl cursor-grab active:cursor-grabbing text-3xl font-bold text-white shadow-[0_8px_0_rgb(0,0,0,0.1)] select-none z-10 pointer-events-auto",
+        "absolute flex items-center justify-center w-20 h-20 lg:w-24 lg:h-24 rounded-2xl lg:rounded-3xl cursor-grab active:cursor-grabbing text-4xl lg:text-5xl font-black text-white shadow-[0_8px_0_rgb(0,0,0,0.1)] select-none z-10 pointer-events-auto",
         "before:content-[''] before:absolute before:top-1 before:left-1 before:right-1 before:h-1/2 before:bg-white/20 before:rounded-t-xl",
         status === "correct" && "cursor-default pointer-events-none shadow-none translate-y-[4px]",
         status === "incorrect" && "animate-shake"

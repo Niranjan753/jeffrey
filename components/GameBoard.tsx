@@ -7,6 +7,8 @@ import { WordSlot } from "./WordSlot";
 import { LEVELS } from "@/data/levels";
 import { shuffleArray, getRandomPosition, cn, speak } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface GameBoardProps {
   level: number;
@@ -49,6 +51,8 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
   const [placedLetters, setPlacedLetters] = useState<(string | null)[]>(
     new Array(word.length).fill(null)
   );
+  
+  const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
   
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -110,14 +114,16 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
     });
 
     speak(word);
+    setShowCompletionOverlay(true);
 
     setTimeout(() => {
+      setShowCompletionOverlay(false);
       if (wordIndex === currentLevel.words.length - 1) {
         onLevelComplete();
       } else {
         onWordComplete();
       }
-    }, 1500);
+    }, 2500); // 2.5 seconds to show the image and progress
   };
 
   return (
@@ -137,7 +143,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
       </div>
 
       {/* Target Word Display */}
-      <div className="flex gap-4 items-center justify-center mt-20">
+      <div className="flex flex-wrap gap-3 lg:gap-4 items-center justify-center mt-24 lg:mt-32 px-4">
         {word.split("").map((char, index) => (
           <div
             key={`slot-${index}`}
@@ -150,6 +156,43 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete }:
           </div>
         ))}
       </div>
+
+      {/* Completion Overlay */}
+      <AnimatePresence>
+        {showCompletionOverlay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm pointer-events-auto"
+          >
+            {currentWordData.image && (
+              <motion.div
+                initial={{ scale: 0.8, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="relative w-64 h-64 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white mb-8"
+              >
+                <Image
+                  src={currentWordData.image}
+                  alt={word}
+                  fill
+                  className="object-cover"
+                />
+              </motion.div>
+            )}
+            <motion.h2
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              className="text-6xl font-black text-blue-600 mb-2"
+            >
+              {word}!
+            </motion.h2>
+            <p className="text-2xl font-bold text-gray-400 uppercase tracking-widest">
+              Word {wordIndex + 1}/{currentLevel.words.length} Completed
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Scattered Letters */}
       <div className="absolute inset-0 pointer-events-none">
