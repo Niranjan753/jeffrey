@@ -11,7 +11,7 @@ export const WordSlot = ({ letter, isFilled }: WordSlotProps) => {
   return (
     <div
       className={cn(
-        "relative w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 border-2 sm:border-2 md:border-3 lg:border-4 rounded-md sm:rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center text-lg sm:text-xl md:text-2xl lg:text-3xl font-black transition-all duration-300 ease-out will-change-transform",
+        "relative w-12 h-12 sm:w-14 sm:h-14 md:w-18 md:h-18 lg:w-22 lg:h-22 border-2 sm:border-2 md:border-3 lg:border-4 rounded-lg sm:rounded-xl md:rounded-2xl lg:rounded-3xl flex items-center justify-center text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black transition-all duration-300 ease-out will-change-transform",
         isFilled 
           ? "border-transparent bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-[0_2px_0_rgb(30,64,175)] sm:shadow-[0_3px_0_rgb(30,64,175)] md:shadow-[0_4px_0_rgb(30,64,175)] scale-105" 
           : "border-dashed border-gray-300 bg-white/60 backdrop-blur-sm text-transparent shadow-sm hover:border-gray-400 hover:shadow-md"
