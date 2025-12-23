@@ -128,7 +128,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 overflow-hidden touch-none">
+    <div className="relative w-full h-screen max-h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 overflow-hidden touch-none">
       {/* Decorative background elements with better positioning */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-pink-200/30 blur-3xl" />
@@ -154,21 +154,21 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       </div>
 
       {/* Top Section with Title */}
-      <div className="relative z-10 w-full pt-4 md:pt-8 pb-2 md:pb-4 text-center pointer-events-none px-4">
+      <div className="relative z-10 w-full pt-1 md:pt-3 pb-0.5 md:pb-2 text-center pointer-events-none px-2 flex-shrink-0">
         <motion.h2 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-base md:text-xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 uppercase tracking-wider mb-1 md:mb-2"
+          className="text-[9px] sm:text-xs md:text-lg lg:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 uppercase tracking-wide sm:tracking-wider"
         >
           Arrange the letters!
         </motion.h2>
-        <div className="flex items-center justify-center gap-2 text-gray-400 text-xs md:text-sm font-bold">
+        <div className="hidden lg:flex items-center justify-center gap-2 text-gray-400 text-xs md:text-sm font-bold">
           <span>Drag and drop to spell</span>
         </div>
       </div>
 
       {/* Target Word Display - Centered */}
-      <div className="relative z-10 flex-shrink-0 flex flex-wrap gap-2 md:gap-3 lg:gap-4 items-center justify-center px-4 py-4 md:py-8 mt-2 md:mt-8">
+      <div className="relative z-10 flex-shrink-0 flex flex-wrap gap-1 sm:gap-1.5 md:gap-3 lg:gap-4 items-center justify-center px-2 sm:px-4 py-1 sm:py-2 md:py-4 max-w-[95%] sm:max-w-full">
         {word.split("").map((char, index) => (
           <motion.div
             key={`slot-${index}`}
@@ -205,7 +205,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
                 initial={{ scale: 0.8, y: 20, opacity: 0 }}
                 animate={{ scale: 1, y: 0, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.1 }}
-                className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-3xl sm:rounded-[40px] overflow-hidden shadow-2xl border-4 sm:border-8 border-white mb-6 sm:mb-8"
+                className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-3 md:border-5 border-white mb-2 sm:mb-4 md:mb-6"
               >
                 <Image
                   src={currentWordData.image}
@@ -219,7 +219,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-black text-blue-600 mb-2 px-4"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-blue-600 mb-1 px-3"
             >
               {word}!
             </motion.h2>
@@ -227,7 +227,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.3 }}
-              className="text-base sm:text-xl md:text-2xl font-bold text-gray-400 uppercase tracking-widest px-4 text-center"
+              className="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-gray-400 uppercase tracking-widest px-4 text-center"
             >
               Word {wordIndex + 1}/{currentLevel.words.length} Completed
             </motion.p>
@@ -236,42 +236,44 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       </AnimatePresence>
 
       {/* Playing Area - This is where letters will be scattered */}
-      <div className="relative z-0 flex-grow w-full min-h-[300px] md:min-h-[400px] max-h-[500px] pointer-events-none px-2 md:px-4">
-        {letters.map((letter) => (
-          <div key={letter.id}>
-            {letter.status !== "correct" && (
-              <DraggableLetter
-                id={letter.id}
-                letter={letter.char}
-                initialX={letter.initialX}
-                initialY={letter.initialY}
-                color={letter.color}
-                status={letter.status}
-                onDrop={handleDrop}
-              />
-            )}
-          </div>
-        ))}
+      <div className="relative z-0 flex-1 min-h-0 w-full pointer-events-none px-2 md:px-4 flex items-center justify-center">
+        <div className="relative w-full h-full max-w-2xl">
+          {letters.map((letter) => (
+            <div key={letter.id}>
+              {letter.status !== "correct" && (
+                <DraggableLetter
+                  id={letter.id}
+                  letter={letter.char}
+                  initialX={letter.initialX}
+                  initialY={letter.initialY}
+                  color={letter.color}
+                  status={letter.status}
+                  onDrop={handleDrop}
+                />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Progress Indicator - Bottom fixed with proper spacing */}
-      <div className="relative z-10 w-full flex justify-center pb-6 md:pb-8 pt-3 md:pt-4 flex-shrink-0 px-4">
+      <div className="relative z-10 w-full flex justify-center pb-1.5 sm:pb-3 md:pb-5 pt-0.5 sm:pt-1.5 md:pt-2.5 flex-shrink-0 px-2 sm:px-4">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white/90 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 rounded-2xl sm:rounded-3xl shadow-xl border-2 border-gray-100 flex items-center gap-3 sm:gap-4 lg:gap-6 will-change-transform max-w-full overflow-hidden"
+          className="bg-white/90 backdrop-blur-md px-1.5 sm:px-3 md:px-5 lg:px-7 py-0.5 sm:py-1.5 md:py-2.5 lg:py-3.5 rounded-md sm:rounded-xl md:rounded-2xl shadow-sm sm:shadow-md md:shadow-lg border border-gray-100 sm:border-2 flex items-center gap-1 sm:gap-2 md:gap-4 lg:gap-6 will-change-transform max-w-full overflow-hidden"
         >
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white font-black text-base sm:text-lg">{level}</span>
+          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+            <div className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-sm sm:rounded-md md:rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm flex-shrink-0">
+              <span className="text-white font-black text-[8px] sm:text-xs md:text-sm">{level}</span>
             </div>
-            <span className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wider hidden md:block">Level</span>
+            <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide hidden md:block">Lv</span>
           </div>
           
-          <div className="h-6 sm:h-8 w-px bg-gray-200 flex-shrink-0" />
+          <div className="h-3 sm:h-4 md:h-6 w-px bg-gray-200 flex-shrink-0" />
           
-          <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-center">
+          <div className="flex gap-0.5 sm:gap-1 md:gap-1.5 flex-wrap justify-center">
             {currentLevel.words.map((_, i) => {
               const isClickable = i <= wordIndex;
               const isCompleted = i < wordIndex;
@@ -283,20 +285,20 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
                   onClick={() => isClickable && onWordIndexChange?.(i)}
                   disabled={!isClickable}
                   className={cn(
-                    "relative w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 rounded-full transition-all duration-300 ease-out flex-shrink-0",
+                    "relative w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full transition-all duration-300 ease-out flex-shrink-0",
                     isCompleted 
-                      ? "bg-green-500 scale-100 shadow-md shadow-green-200 hover:scale-110 cursor-pointer" 
+                      ? "bg-green-500 scale-100 shadow-sm shadow-green-200 hover:scale-110 cursor-pointer" 
                       : isCurrent 
-                        ? "bg-blue-500 animate-pulse scale-110 shadow-md shadow-blue-200 cursor-pointer hover:scale-115" 
+                        ? "bg-blue-500 animate-pulse scale-100 shadow-sm shadow-blue-200 cursor-pointer hover:scale-115" 
                         : "bg-gray-200 cursor-not-allowed opacity-50",
                     isClickable && "active:scale-95 active:transition-transform active:duration-100"
                   )}
                 >
                   {isCompleted && (
-                    <span className="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[10px] lg:text-xs text-white font-bold">✓</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] text-white font-bold">✓</span>
                   )}
                   {isCurrent && (
-                    <span className="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[10px] lg:text-xs text-white font-black">{i + 1}</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] text-white font-black">{i + 1}</span>
                   )}
                 </button>
               );
