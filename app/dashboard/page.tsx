@@ -49,16 +49,16 @@ export default function Dashboard() {
     // First, go back to map with fade transition
     setGameState("animating_to_next");
     
-    // Trigger scroll animation to next level
+    // Trigger scroll and avatar animation to next level
     setTimeout(() => {
       setShouldScrollToLevel(currentLevel + 1);
-    }, 600);
+    }, 400);
     
-    // Show completion overlay after scroll animation completes
+    // Show completion overlay after animations complete
     setTimeout(() => {
       setGameState("level_complete");
       setShouldScrollToLevel(null);
-    }, 3200);
+    }, 2800);
   };
 
   const goBackToMenu = () => {

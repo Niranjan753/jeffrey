@@ -125,18 +125,17 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
               d={`M ${LEVEL_POSITIONS[scrollToLevel - 2].x} ${LEVEL_POSITIONS[scrollToLevel - 2].y} L ${LEVEL_POSITIONS[scrollToLevel - 1].x} ${LEVEL_POSITIONS[scrollToLevel - 1].y}`}
               fill="none"
               stroke="url(#gradient)"
-              strokeWidth="6"
+              strokeWidth="5"
               strokeLinecap="round"
               initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 1.5, ease: "easeInOut", delay: 0.3 }}
+              animate={{ pathLength: 1, opacity: 0.8 }}
+              transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
             />
           )}
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity="1" />
-              <stop offset="50%" stopColor="#f472b6" stopOpacity="1" />
-              <stop offset="100%" stopColor="#60a5fa" stopOpacity="1" />
+              <stop offset="0%" stopColor="#fcd34d" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#fb923c" stopOpacity="0.9" />
             </linearGradient>
           </defs>
         </svg>
@@ -158,15 +157,6 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
                 transform: 'translate(-50%, -50%)',
               }}
               className="absolute z-20"
-              animate={scrollToLevel === l.level ? {
-                scale: [1, 1.4, 1.2],
-                rotate: [0, 15, -15, 10, -10, 0],
-              } : {}}
-              transition={{
-                duration: 1.2,
-                ease: "easeInOut",
-                repeat: scrollToLevel === l.level ? 1 : 0,
-              }}
             >
               <motion.button
                 whileHover={!isLocked ? { scale: 1.1 } : {}}
@@ -186,19 +176,8 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
                       ? "bg-pink-500 border-white ring-4 ring-pink-200"
                       : isCompleted
                         ? "bg-yellow-400 border-white"
-                        : "bg-white border-blue-400",
-                  scrollToLevel === l.level && "ring-8 ring-yellow-300 shadow-2xl shadow-yellow-400"
+                        : "bg-white border-blue-400"
                 )}>
-                  {scrollToLevel === l.level && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0, 0.8, 0] }}
-                      transition={{ duration: 1, repeat: 2, ease: "easeInOut" }}
-                      className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/80 to-white/0 rounded-full"
-                      style={{ transform: 'translateX(-100%)' }}
-                    />
-                  )}
-                  
                   <span className={cn(
                     "text-2xl lg:text-3xl font-black transition-all relative z-10",
                     isLocked ? "text-gray-400" : isCurrent ? "text-white" : "text-gray-800"
@@ -228,8 +207,8 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
                   </div>
                 )}
 
-                {/* Current Level Indicator (Avatar) */}
-                {isCurrent && (
+                {/* Current Level Indicator (Avatar) - Only show if not animating */}
+                {isCurrent && !scrollToLevel && (
                   <motion.div 
                     animate={{ y: [-10, 0, -10] }}
                     transition={{ repeat: Infinity, duration: 2 }}
@@ -237,38 +216,6 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
                   >
                     <Image src="https://api.dicebear.com/7.x/adventurer/svg?seed=avatar" alt="current" fill className="object-cover" />
                   </motion.div>
-                )}
-
-                {/* Sparkle effect when scrolling to this level */}
-                {scrollToLevel === l.level && (
-                  <>
-                    {[...Array(8)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ scale: 0, opacity: 1 }}
-                        animate={{
-                          scale: [0, 1.5, 0],
-                          opacity: [1, 1, 0],
-                          x: [0, Math.cos((i / 8) * Math.PI * 2) * 60],
-                          y: [0, Math.sin((i / 8) * Math.PI * 2) * 60],
-                        }}
-                        transition={{
-                          duration: 1,
-                          delay: 0.5 + i * 0.1,
-                          ease: "easeOut",
-                        }}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                      >
-                        <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg shadow-yellow-300" />
-                      </motion.div>
-                    ))}
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: [0, 2.5, 0], opacity: [0, 0.6, 0] }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-gradient-to-r from-yellow-400 via-pink-400 to-blue-400 pointer-events-none blur-xl"
-                    />
-                  </>
                 )}
               </motion.button>
             </motion.div>
@@ -282,6 +229,30 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
         <div className="absolute bottom-[30%] left-[15%] opacity-20 pointer-events-none">
             <MapIcon className="w-16 h-16 text-blue-600" />
         </div>
+
+        {/* Animated Avatar moving from previous to next level */}
+        {scrollToLevel && scrollToLevel > 1 && (
+          <motion.div
+            initial={{ 
+              left: `${LEVEL_POSITIONS[scrollToLevel - 2].x}%`,
+              top: `calc(${LEVEL_POSITIONS[scrollToLevel - 2].y}% - 60px)`,
+            }}
+            animate={{ 
+              left: `${LEVEL_POSITIONS[scrollToLevel - 1].x}%`,
+              top: `calc(${LEVEL_POSITIONS[scrollToLevel - 1].y}% - 60px)`,
+            }}
+            transition={{
+              duration: 1.5,
+              ease: [0.4, 0, 0.2, 1],
+              delay: 0.4
+            }}
+            className="absolute -translate-x-1/2 z-40 pointer-events-none"
+          >
+            <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl border-4 border-white overflow-hidden bg-white shadow-2xl">
+              <Image src="https://api.dicebear.com/7.x/adventurer/svg?seed=avatar" alt="moving" width={64} height={64} className="object-cover" />
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Bottom Nav Bar */}
