@@ -1,10 +1,15 @@
 import { betterAuth } from 'better-auth';
+import { Pool } from 'pg';
 
 export const auth = betterAuth({
-    database: {
-        provider: "postgres",
-        url: process.env.DATABASE_URL || "",
-    },
+    // Using a Pool is the most stable way to connect to Postgres in Serverless environments
+    database: process.env.DATABASE_URL 
+        ? new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false }
+          })
+        : undefined,
+
     emailAndPassword: {
         enabled: true,
         async sendResetPassword(data, request) {

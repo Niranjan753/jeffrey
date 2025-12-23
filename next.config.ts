@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["pg"],
   images: {
     dangerouslyAllowSVG: true,
     remotePatterns: [
