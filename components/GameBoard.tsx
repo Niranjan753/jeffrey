@@ -1,5 +1,6 @@
 "use client";
 
+// pronounciation branch
 import { useState, useRef } from "react";
 import { DraggableLetter } from "./DraggableLetter";
 import { WordSlot } from "./WordSlot";
