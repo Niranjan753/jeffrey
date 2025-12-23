@@ -8,6 +8,8 @@ import { ChevronLeft, LogOut } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { MusicControl } from "@/components/MusicControl";
+import { playLevelWinSound } from "@/lib/utils";
 
 export default function Dashboard() {
   const { data: session, isPending } = useSession();
@@ -48,6 +50,7 @@ export default function Dashboard() {
     const newCompleted = [...new Set([...completedLevels, currentLevel])];
     setCompletedLevels(newCompleted);
     localStorage.setItem("word-game-progress", JSON.stringify(newCompleted));
+    playLevelWinSound();
     setGameState("level_complete");
   };
 
@@ -65,9 +68,10 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-white font-[family-name:var(--font-geist-sans)]">
+      <MusicControl />
       {/* User Header */}
       <div className="absolute top-8 right-8 flex items-center gap-4 z-50">
-        <div className="text-right">
+        <div className="hidden sm:block text-right">
           <p className="text-sm font-bold text-gray-700">{session.user.name}</p>
           <p className="text-xs text-gray-400">{session.user.email}</p>
         </div>

@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import Image from "next/image";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, ChevronLeft } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -43,7 +43,10 @@ export default function SignUp() {
 	};
 
 	return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4 relative">
+      <Link href="/" className="absolute top-8 left-8 p-4 rounded-full bg-white text-gray-400 hover:text-gray-600 transition-all z-50 shadow-sm border border-gray-100">
+        <ChevronLeft size={32} />
+      </Link>
       <Card className="z-50 rounded-md max-w-md w-full">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">Sign Up</CardTitle>
