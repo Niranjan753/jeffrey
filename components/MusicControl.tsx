@@ -37,7 +37,12 @@ export function MusicControl() {
   }, [volume, isMuted]);
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    // Also directly control audio element
+    if (audioRef.current) {
+      audioRef.current.muted = newMutedState;
+    }
   };
 
   const toggleSlider = () => {
@@ -45,7 +50,7 @@ export function MusicControl() {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 md:right-8 z-[60] flex items-center gap-3">
+    <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[60] flex items-center gap-3">
       {/* Ensure it's above mobile menu */}
       <audio 
         ref={audioRef}
@@ -70,8 +75,13 @@ export function MusicControl() {
               onChange={(e) => {
                 const newVol = parseFloat(e.target.value);
                 setVolume(newVol);
-                if (newVol > 0) setIsMuted(false);
-                else setIsMuted(true);
+                if (newVol > 0) {
+                  setIsMuted(false);
+                  if (audioRef.current) audioRef.current.muted = false;
+                } else {
+                  setIsMuted(true);
+                  if (audioRef.current) audioRef.current.muted = true;
+                }
               }}
               className="w-20 md:w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
               style={{
@@ -87,12 +97,8 @@ export function MusicControl() {
         size="icon"
         onClick={(e) => {
           e.stopPropagation();
-          // On mobile, show slider. On desktop, just toggle mute
-          if (window.innerWidth < 768) {
-            toggleSlider();
-          } else {
-            toggleMute();
-          }
+          // On mobile, toggle mute directly. On desktop, also toggle mute
+          toggleMute();
         }}
         onMouseEnter={() => {
           // Only show on hover for desktop

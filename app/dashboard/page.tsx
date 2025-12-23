@@ -85,9 +85,9 @@ export default function Dashboard() {
               >
                 <button
                   onClick={goBackToMenu}
-                  className="absolute top-20 md:top-8 left-8 p-4 rounded-full bg-white text-gray-400 hover:text-gray-600 transition-all z-50 shadow-md border border-gray-100"
+                  className="absolute top-6 md:top-8 left-4 md:left-8 p-3 md:p-4 rounded-full bg-white text-gray-400 hover:text-gray-600 transition-all z-50 shadow-md border border-gray-100 active:scale-95"
                 >
-                  <ChevronLeft size={32} />
+                  <ChevronLeft size={24} className="md:w-8 md:h-8" />
                 </button>
                 <GameBoard
                   key={`${currentLevel}-${currentWordIndex}`}
