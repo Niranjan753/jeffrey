@@ -28,38 +28,38 @@ function SignInContent() {
     const demoPassword = "password123";
 
     try {
-      // Try to sign up first (in case it's a fresh database/memory)
-      await signUp.email({
+      // 1. Try to SIGN IN first
+      await signIn.email({
         email: demoEmail,
         password: demoPassword,
-        name: "Demo Explorer",
         callbackURL: "/dashboard",
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success("Welcome to the demo!");
-            router.push("/dashboard");
-          },
-          onError: async (ctx) => {
-            // If user already exists, just sign in
-            if (ctx.error.message.includes("already exists") || ctx.error.status === 400 || ctx.error.status === 422) {
-              await signIn.email({
-                email: demoEmail,
-                password: demoPassword,
-                callbackURL: "/dashboard",
-              }, {
+      }, {
+        onSuccess: () => {
+          toast.success("Logged in as Demo User");
+          router.push("/dashboard");
+        },
+        onError: async (ctx) => {
+          // 2. If Sign In fails (user doesn't exist), then SIGN UP
+          if (ctx.error.status === 401 || ctx.error.message.includes("invalid")) {
+            await signUp.email({
+              email: demoEmail,
+              password: demoPassword,
+              name: "Demo Explorer",
+              callbackURL: "/dashboard",
+              fetchOptions: {
                 onSuccess: () => {
-                  toast.success("Logged in as Demo User");
+                  toast.success("Welcome to the demo!");
                   router.push("/dashboard");
                 },
-                onError: (ctx) => {
-                  toast.error("Demo login failed: " + ctx.error.message);
+                onError: (signUpCtx) => {
+                  toast.error("Demo access failed: " + signUpCtx.error.message);
                   setDemoLoading(false);
                 }
-              });
-            } else {
-              toast.error("Error: " + ctx.error.message);
-              setDemoLoading(false);
-            }
+              }
+            });
+          } else {
+            toast.error("Demo login error: " + ctx.error.message);
+            setDemoLoading(false);
           }
         }
       });

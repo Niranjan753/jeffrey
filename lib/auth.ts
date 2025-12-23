@@ -10,6 +10,12 @@ export const auth = betterAuth({
           })
         : undefined,
 
+    // Disabling rate limiting for now to prevent the 429 "Too Many Requests" errors
+    // during development and initial testing.
+    rateLimit: {
+        enabled: false,
+    },
+
     emailAndPassword: {
         enabled: true,
         async sendResetPassword(data, request) {
