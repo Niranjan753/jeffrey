@@ -23,15 +23,15 @@ export const DraggableLetter = ({
   initialY,
   color,
 }: DraggableLetterProps) => {
+  const [isActive, setIsActive] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
   const [initialRotation] = useState(() => Math.random() * 40 - 20); // Random rotation between -20 and 20
   
   // Handle the repeating pronunciation logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if ((isPressed || isDragging) && status !== "correct") {
+    if (isActive && status !== "correct") {
       // Speak immediately
       speak(letter.toLowerCase());
       
@@ -42,13 +42,22 @@ export const DraggableLetter = ({
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+        // We don't call cancel() here because we want the last utterance to finish
+        // unless a new one starts (which speak() handles with cancel())
+      }
     };
-  }, [isPressed, isDragging, letter, status]);
+  }, [isActive, letter, status]);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+    setIsActive(true);
+  };
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
-    setIsPressed(false);
+    setIsActive(false);
     onDrop(id, info.point.x, info.point.y);
   };
 
@@ -56,19 +65,19 @@ export const DraggableLetter = ({
     <motion.div
       drag
       dragMomentum={false}
-      onDragStart={() => setIsDragging(true)}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onPointerDown={() => setIsPressed(true)}
-      onPointerUp={() => setIsPressed(false)}
-      onPointerCancel={() => setIsPressed(false)}
+      onPointerDown={() => setIsActive(true)}
+      onPointerUp={() => !isDragging && setIsActive(false)}
+      onPointerCancel={() => setIsActive(false)}
       animate={
         status === "correct"
           ? { scale: 1, opacity: 1, rotate: 0 }
           : status === "incorrect"
           ? { x: 0, y: 0, scale: 1, rotate: initialRotation }
           : { 
-              scale: isDragging ? 1.2 : 1, 
-              rotate: isDragging ? 0 : initialRotation 
+              scale: isActive ? 1.2 : 1, 
+              rotate: isActive ? 0 : initialRotation 
             }
       }
       style={{
