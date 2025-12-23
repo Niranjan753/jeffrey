@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Star, Sparkles, Pencil, Trophy, MousePointer2, Volume2, Heart } from "lucide-react";
+import { Star, Sparkles, Pencil, Trophy, MousePointer2, Volume2, Heart, PlayCircle } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -40,6 +40,12 @@ export default function LandingPage() {
           <span className="text-xl lg:text-3xl font-black tracking-tighter text-gray-900 group-hover:text-blue-600 transition-colors uppercase lg:normal-case">WORD MAGIC</span>
         </div>
         <div className="flex gap-2 lg:gap-6 items-center">
+          <Link href="/sign-in?demo=true">
+            <Button variant="ghost" className="font-black text-blue-500 hover:text-blue-600 hover:bg-blue-50 text-sm lg:text-lg px-2 lg:px-4 hidden sm:flex items-center gap-2">
+              <PlayCircle size={18} />
+              Try Demo
+            </Button>
+          </Link>
           <Link href="/sign-in">
             <Button variant="ghost" className="font-black text-gray-500 hover:text-blue-600 hover:bg-transparent text-sm lg:text-lg px-2 lg:px-4">Login</Button>
           </Link>
@@ -195,12 +201,19 @@ export default function LandingPage() {
 
       {/* Bottom Minimal Footer */}
       <footer className="relative z-20 px-6 lg:px-10 py-6 lg:py-8 flex flex-col lg:flex-row items-center justify-between shrink-0 gap-4 mt-auto">
+        {/* Navigation Links */}
+        <nav className="flex gap-6 lg:gap-8 order-1 lg:order-2" aria-label="Footer navigation">
+          <Link href="/privacy" className="text-gray-400 hover:text-gray-600 transition-colors text-[10px] lg:text-sm font-bold uppercase tracking-widest">
+            Privacy
+          </Link>
+          <Link href="/terms" className="text-gray-400 hover:text-gray-600 transition-colors text-[10px] lg:text-sm font-bold uppercase tracking-widest">
+            Terms
+          </Link>
+          <Link href="/support" className="text-gray-400 hover:text-gray-600 transition-colors text-[10px] lg:text-sm font-bold uppercase tracking-widest">
+            Support
+          </Link>
+        </nav>
         <p className="text-gray-400 text-[10px] lg:text-sm font-bold order-2 lg:order-1">© 2025 WORD MAGIC</p>
-        <div className="flex gap-6 lg:gap-8 order-1 lg:order-2">
-          {["Privacy", "Terms", "Support"].map(item => (
-            <Link key={item} href="#" className="text-gray-400 hover:text-gray-600 transition-colors text-[10px] lg:text-sm font-bold uppercase tracking-widest">{item}</Link>
-          ))}
-        </div>
       </footer>
     </div>
   );
