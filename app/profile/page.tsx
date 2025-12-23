@@ -48,21 +48,21 @@ export default function ProfilePage() {
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
       <Sidebar />
       
-      <main className="flex-grow relative flex flex-col min-w-0 h-full overflow-y-auto">
+      <main className="flex-grow relative flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden scroll-smooth">
         {/* Mobile Top Padding */}
         <div className="h-16 md:hidden flex-shrink-0" />
         
         {/* Content */}
-        <div className="flex-grow p-6 md:p-10">
+        <div className="flex-grow p-4 sm:p-6 md:p-10">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
             >
-              <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">Profile</h1>
-              <p className="text-lg text-gray-500 font-medium">Your learning journey</p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-2">Profile</h1>
+              <p className="text-sm sm:text-base md:text-lg text-gray-500 font-medium">Your learning journey</p>
             </motion.div>
 
             {/* Profile Card */}
@@ -70,12 +70,12 @@ export default function ProfilePage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 mb-6"
+              className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100 mb-6"
             >
-              <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
                 {/* Avatar */}
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl border-4 border-white">
-                  <User className="w-16 h-16 text-white" />
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl border-4 border-white flex-shrink-0">
+                  <User className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
                 </div>
 
                 {/* User Info */}
@@ -104,20 +104,20 @@ export default function ProfilePage() {
             </motion.div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
               {stats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all"
+                  className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all"
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md mb-3`}>
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md mb-2 sm:mb-3`}>
+                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
-                  <div className="text-3xl font-black text-gray-900 mb-1">{stat.value}</div>
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{stat.label}</div>
+                  <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{stat.value}</div>
+                  <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">{stat.label}</div>
                 </motion.div>
               ))}
             </div>

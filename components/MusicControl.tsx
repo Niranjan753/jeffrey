@@ -9,7 +9,7 @@ export function MusicControl() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [showSlider, setShowSlider] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -40,12 +40,13 @@ export function MusicControl() {
     setIsMuted(!isMuted);
   };
 
+  const toggleSlider = () => {
+    setShowSlider(!showSlider);
+  };
+
   return (
-    <div 
-      className="fixed bottom-8 right-8 z-[60] flex items-center gap-3"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="fixed bottom-8 right-8 md:right-8 z-[60] flex items-center gap-3">
+      {/* Ensure it's above mobile menu */}
       <audio 
         ref={audioRef}
         src="/music.mp3"
@@ -53,12 +54,12 @@ export function MusicControl() {
       />
       
       <AnimatePresence>
-        {isHovered && (
+        {showSlider && (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 order-first"
+            initial={{ opacity: 0, x: 20, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 20, scale: 0.9 }}
+            className="bg-white/95 backdrop-blur-md p-3 md:p-3 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-3 order-first"
           >
             <input
               type="range"
@@ -72,7 +73,10 @@ export function MusicControl() {
                 if (newVol > 0) setIsMuted(false);
                 else setIsMuted(true);
               }}
-              className="w-24 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-20 md:w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              style={{
+                WebkitAppearance: 'none',
+              }}
             />
           </motion.div>
         )}
@@ -83,9 +87,26 @@ export function MusicControl() {
         size="icon"
         onClick={(e) => {
           e.stopPropagation();
-          toggleMute();
+          // On mobile, show slider. On desktop, just toggle mute
+          if (window.innerWidth < 768) {
+            toggleSlider();
+          } else {
+            toggleMute();
+          }
         }}
-        className="rounded-full h-12 w-12 bg-white/90 backdrop-blur-sm shadow-xl border-gray-100 group relative overflow-hidden active:scale-95 transition-all"
+        onMouseEnter={() => {
+          // Only show on hover for desktop
+          if (window.innerWidth >= 768) {
+            setShowSlider(true);
+          }
+        }}
+        onMouseLeave={() => {
+          // Only hide on mouse leave for desktop
+          if (window.innerWidth >= 768) {
+            setShowSlider(false);
+          }
+        }}
+        className="rounded-full h-14 w-14 md:h-12 md:w-12 bg-white/95 backdrop-blur-md shadow-2xl border-gray-100 group relative overflow-hidden active:scale-95 transition-all touch-manipulation"
       >
         <AnimatePresence mode="wait">
           {isMuted || volume === 0 ? (
@@ -95,7 +116,7 @@ export function MusicControl() {
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 45 }}
             >
-              <VolumeX size={20} className="text-gray-400" />
+              <VolumeX size={22} className="text-gray-400" />
             </motion.div>
           ) : (
             <motion.div
@@ -105,7 +126,7 @@ export function MusicControl() {
               exit={{ scale: 0, rotate: -45 }}
               className="relative flex items-center justify-center"
             >
-              <Volume2 size={20} className="text-blue-500 z-10" />
+              <Volume2 size={22} className="text-blue-500 z-10" />
               <motion.div
                 animate={{
                   scale: [1, 1.4, 1],

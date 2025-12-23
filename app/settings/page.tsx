@@ -14,26 +14,26 @@ export default function SettingsPage() {
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
       <Sidebar />
       
-      <main className="flex-grow relative flex flex-col min-w-0 h-full overflow-y-auto">
+      <main className="flex-grow relative flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden scroll-smooth">
         {/* Mobile Top Padding */}
         <div className="h-16 md:hidden flex-shrink-0" />
         
         {/* Content */}
-        <div className="flex-grow p-6 md:p-10">
+        <div className="flex-grow p-4 sm:p-6 md:p-10">
           <div className="max-w-3xl mx-auto">
             {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-xl">
-                  <SettingsIcon className="w-8 h-8 text-white" />
+              <div className="flex items-center gap-3 sm:gap-4 mb-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-xl flex-shrink-0">
+                  <SettingsIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl md:text-5xl font-black text-gray-900">Settings</h1>
-                  <p className="text-lg text-gray-500 font-medium">Customize your experience</p>
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900">Settings</h1>
+                  <p className="text-sm sm:text-base md:text-lg text-gray-500 font-medium">Customize your experience</p>
                 </div>
               </div>
             </motion.div>
@@ -43,13 +43,13 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 mb-6"
+              className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100 mb-6"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <Volume2 className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h2 className="text-2xl font-black text-gray-900">Audio</h2>
+                <h2 className="text-xl sm:text-2xl font-black text-gray-900">Audio</h2>
               </div>
 
               <div className="space-y-4">

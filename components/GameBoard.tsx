@@ -173,9 +173,14 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
           <motion.div
             key={`slot-${index}`}
             ref={(el) => { slotRefs.current[index] = el; }}
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: index * 0.1, type: "spring" }}
+            initial={{ scale: 0, rotate: -180, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ 
+              delay: index * 0.08, 
+              type: "spring",
+              stiffness: 260,
+              damping: 20
+            }}
           >
             <WordSlot
               letter={char}
@@ -192,12 +197,14 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm pointer-events-auto"
           >
             {currentWordData.image && (
               <motion.div
-                initial={{ scale: 0.8, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
+                initial={{ scale: 0.8, y: 20, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.1 }}
                 className="relative w-64 h-64 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white mb-8"
               >
                 <Image
@@ -209,15 +216,21 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
               </motion.div>
             )}
             <motion.h2
-              initial={{ scale: 0.5 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
               className="text-6xl font-black text-blue-600 mb-2"
             >
               {word}!
             </motion.h2>
-            <p className="text-2xl font-bold text-gray-400 uppercase tracking-widest">
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.3 }}
+              className="text-2xl font-bold text-gray-400 uppercase tracking-widest"
+            >
               Word {wordIndex + 1}/{currentLevel.words.length} Completed
-            </p>
+            </motion.p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -246,7 +259,8 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-white/90 backdrop-blur-md px-6 lg:px-8 py-3 lg:py-4 rounded-3xl shadow-xl border-2 border-gray-100 flex items-center gap-4 lg:gap-6"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="bg-white/90 backdrop-blur-md px-6 lg:px-8 py-3 lg:py-4 rounded-3xl shadow-xl border-2 border-gray-100 flex items-center gap-4 lg:gap-6 will-change-transform"
         >
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
@@ -269,13 +283,13 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
                   onClick={() => isClickable && onWordIndexChange?.(i)}
                   disabled={!isClickable}
                   className={cn(
-                    "relative w-6 h-6 lg:w-8 lg:h-8 rounded-full transition-all duration-300",
+                    "relative w-6 h-6 lg:w-8 lg:h-8 rounded-full transition-all duration-300 ease-out",
                     isCompleted 
                       ? "bg-green-500 scale-100 shadow-lg shadow-green-200 hover:scale-110 cursor-pointer" 
                       : isCurrent 
                         ? "bg-blue-500 animate-pulse scale-110 shadow-lg shadow-blue-200 cursor-pointer hover:scale-115" 
                         : "bg-gray-200 cursor-not-allowed opacity-50",
-                    isClickable && "active:scale-95"
+                    isClickable && "active:scale-95 active:transition-transform active:duration-100"
                   )}
                 >
                   {isCompleted && (
