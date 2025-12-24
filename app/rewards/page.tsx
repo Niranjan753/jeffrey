@@ -95,7 +95,7 @@ export default function RewardsPage() {
             <Link href="/dashboard">
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
               </motion.button>
@@ -134,7 +134,7 @@ export default function RewardsPage() {
               className={cn(
                 "w-full py-6 rounded-2xl font-bold text-xl transition-all",
                 canClaimDaily
-                  ? "bg-[#0a33ff] text-white hover:bg-[#0829cc] shadow-lg"
+                  ? "bg-[#0a33ff] text-white hover:bg-[#0829cc] shadow-lg cursor-pointer"
                   : "bg-gray-100 text-gray-400 cursor-not-allowed"
               )}
             >

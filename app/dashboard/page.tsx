@@ -10,7 +10,7 @@ import { MusicControl } from "@/components/MusicControl";
 import { playLevelWinSound } from "@/lib/utils";
 import { Sidebar } from "@/components/Sidebar";
 import { GameZone, ZoneLevel } from "@/data/levels";
-import {
+import {  
   loadEngagementState,
   saveEngagementState,
   completeWord,
@@ -224,7 +224,7 @@ export default function Dashboard() {
           >
             <button
               onClick={handleGiveUp}
-              className="p-2 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+              className="p-2 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <ChevronLeft size={20} />
             </button>
@@ -319,14 +319,14 @@ export default function Dashboard() {
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={handlePlayNextLevel}
-                      className="px-8 py-4 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors"
+                      className="px-8 py-4 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors cursor-pointer"
                     >
                       Next Level
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={goBackToMenu}
-                      className="px-8 py-4 bg-gray-100 text-black rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                      className="px-8 py-4 bg-gray-100 text-black rounded-xl font-semibold hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                       Menu
                     </motion.button>
@@ -368,7 +368,7 @@ export default function Dashboard() {
                         setGameState("menu");
                         setShowBuyCoins(true);
                       }}
-                      className="w-full py-3 rounded-xl font-semibold bg-[#0a33ff] text-white hover:bg-[#0829cc] transition-colors flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl font-semibold bg-[#0a33ff] text-white hover:bg-[#0829cc] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Buy Coins
@@ -376,7 +376,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={goBackToMenu}
-                      className="w-full py-3 bg-gray-100 text-black rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                      className="w-full py-3 bg-gray-100 text-black rounded-xl font-semibold hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                       Go Back
                     </button>
@@ -413,7 +413,7 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-bold text-black">Buy Coins</h2>
                 <button
                   onClick={() => setShowBuyCoins(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
@@ -424,7 +424,7 @@ export default function Dashboard() {
                   <button
                     key={pkg.id}
                     className={cn(
-                      "w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all hover:border-gray-300",
+                      "w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all hover:border-gray-300 cursor-pointer",
                       pkg.popular ? "border-[#0a33ff] bg-blue-50/30" : "border-gray-200"
                     )}
                   >
