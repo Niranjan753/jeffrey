@@ -5,7 +5,7 @@ import { GameBoard } from "@/components/GameBoard";
 import { GameZoneMap } from "@/components/GameZoneMap";
 import { ScrambleGame, CrosswordGame, WordSearchGame, MatchGame } from "@/components/games";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Gem, Coins, Flame, Plus, X } from "lucide-react";
+import { ChevronLeft, Coins, Flame, Plus, X } from "lucide-react";
 import { MusicControl } from "@/components/MusicControl";
 import { playLevelWinSound } from "@/lib/utils";
 import { Sidebar } from "@/components/Sidebar";
@@ -43,9 +43,9 @@ export default function Dashboard() {
   const [currentLevel, setCurrentLevel] = useState<ZoneLevel | null>(null);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [engagement, setEngagement] = useState<EngagementState | null>(null);
-  const [coinsEarned, setCoinsEarned] = useState(0);
   const [perfectLevel, setPerfectLevel] = useState(false);
   const [showBuyCoins, setShowBuyCoins] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -105,7 +105,6 @@ export default function Dashboard() {
     const newState = completeLevel(engagement, perfect);
     setEngagement(newState);
     saveEngagementState(newState);
-    setCoinsEarned(perfect ? 80 : 30);
     playLevelWinSound();
     confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ["#0a33ff", "#000000"] });
     setGameState("level_complete");
@@ -113,6 +112,15 @@ export default function Dashboard() {
 
   const handleGiveUp = () => {
     goBackToMenu();
+  };
+
+  const handleRestartLevel = () => {
+    if (!currentZone || !currentLevel) return;
+    // Reset state and restart the same level (don't charge coins again)
+    setCurrentWordIndex(0);
+    setPerfectLevel(true);
+    // Increment restart key to force component remount
+    setRestartKey(prev => prev + 1);
   };
 
   const goBackToMenu = () => {
@@ -162,10 +170,12 @@ export default function Dashboard() {
         if (!currentLevel.scrambleWords) return null;
         return (
           <ScrambleGame
+            key={`${currentLevel.id}-scramble-${restartKey}`}
             words={currentLevel.scrambleWords}
             timeLimit={currentLevel.timeLimit || 60}
             onComplete={handleLevelComplete}
             onWordComplete={handleWordComplete}
+            onRestart={handleRestartLevel}
           />
         );
       case "crossword":
@@ -286,26 +296,17 @@ export default function Dashboard() {
                   transition={{ delay: 0.1 }}
                   className="text-center"
                 >
-                  <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center mx-auto mb-6">
-                    <span className="text-3xl text-white">✓</span>
+                  <div className="w-24 h-24 rounded-full bg-black flex items-center justify-center mx-auto mb-6">
+                    <span className="text-4xl text-white">✓</span>
                   </div>
                   
                   <h2 className="text-4xl font-bold text-black mb-2">
-                    Level {currentLevel?.levelNum} Complete
+                    Level Complete!
                   </h2>
                   
-                  <div className="flex items-center justify-center gap-4 mt-6 mb-8">
-                    <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-xl">
-                      <Coins className="w-5 h-5 text-black" />
-                      <span className="font-bold text-black">+{coinsEarned}</span>
-                    </div>
-                    {perfectLevel && (
-                      <div className="flex items-center gap-2 bg-[#0a33ff] text-white px-4 py-2 rounded-xl">
-                        <Gem className="w-5 h-5" />
-                        <span className="font-bold">+1</span>
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-gray-500 mb-8">
+                    {currentZone?.name} - Level {currentLevel?.levelNum}
+                  </p>
 
                   {engagement && engagement.currentStreak > 0 && (
                     <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full mb-8">

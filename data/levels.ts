@@ -275,7 +275,7 @@ export const GAME_ZONES: GameZone[] = [
     ],
   },
   
-  // Zone 3: Crossword (PREMIUM - 15 gems)
+  // Zone 3: Crossword (PREMIUM - 200 coins)
   {
     id: "crossword-castle",
     name: "Crossword",
@@ -284,7 +284,7 @@ export const GAME_ZONES: GameZone[] = [
     description: "Solve fun crossword puzzles",
     color: "#374151",
     bgGradient: "from-gray-600 to-gray-800",
-    unlockCost: 15,
+    unlockCost: 200,
     levels: [
       {
         id: "cross-1",
@@ -348,7 +348,7 @@ export const GAME_ZONES: GameZone[] = [
     ],
   },
   
-  // Zone 4: Word Search (PREMIUM - 20 gems)
+  // Zone 4: Word Search (PREMIUM - 350 coins)
   {
     id: "search-jungle",
     name: "Word Search",
@@ -357,7 +357,7 @@ export const GAME_ZONES: GameZone[] = [
     description: "Find hidden words in the grid",
     color: "#1f2937",
     bgGradient: "from-gray-700 to-gray-900",
-    unlockCost: 20,
+    unlockCost: 350,
     levels: [
       {
         id: "search-1",
@@ -455,7 +455,7 @@ export const GAME_ZONES: GameZone[] = [
     ],
   },
   
-  // Zone 5: Word Match (PREMIUM - 25 gems)
+  // Zone 5: Word Match (PREMIUM - 500 coins)
   {
     id: "match-mountain",
     name: "Word Match",
@@ -464,7 +464,7 @@ export const GAME_ZONES: GameZone[] = [
     description: "Match words to their pictures",
     color: "#0a33ff",
     bgGradient: "from-blue-700 to-indigo-900",
-    unlockCost: 25,
+    unlockCost: 500,
     levels: [
       {
         id: "match-1",

@@ -4,7 +4,6 @@
 export interface EngagementState {
   // Currency (Main system)
   coins: number;
-  gems: number;
 
   // Streak System (Habit Formation)
   currentStreak: number;
@@ -37,7 +36,6 @@ export interface EngagementState {
 
 const DEFAULT_STATE: EngagementState = {
   coins: 500, // Start with 500 coins
-  gems: 10,
 
   currentStreak: 0,
   lastPlayedDate: null,
@@ -72,12 +70,12 @@ export const LEVEL_COSTS = {
   hard: 30,
 };
 
-// Zone unlock costs (in gems)
+// Zone unlock costs (in coins now instead of gems)
 export const ZONE_UNLOCK_COSTS = {
   free: 0,
-  premium1: 15,
-  premium2: 20,
-  premium3: 25,
+  premium1: 200,
+  premium2: 350,
+  premium3: 500,
 };
 
 // Coin packages for purchase
@@ -89,37 +87,29 @@ export const COIN_PACKAGES = [
   { id: "mega", coins: 25000, price: "$19.99", popular: false },
 ];
 
-// Gem packages for purchase
-export const GEM_PACKAGES = [
-  { id: "few", gems: 20, price: "$1.99" },
-  { id: "some", gems: 50, price: "$3.99" },
-  { id: "many", gems: 120, price: "$7.99" },
-  { id: "lots", gems: 300, price: "$14.99" },
-];
-
 // Daily rewards table (7-day cycle)
 export const DAILY_REWARDS = [
-  { day: 1, coins: 100, gems: 0, special: null },
-  { day: 2, coins: 150, gems: 0, special: null },
-  { day: 3, coins: 200, gems: 1, special: null },
-  { day: 4, coins: 250, gems: 0, special: null },
-  { day: 5, coins: 300, gems: 2, special: null },
-  { day: 6, coins: 400, gems: 0, special: null },
-  { day: 7, coins: 500, gems: 5, special: "bonus" },
+  { day: 1, coins: 100, special: null },
+  { day: 2, coins: 150, special: null },
+  { day: 3, coins: 200, special: null },
+  { day: 4, coins: 250, special: null },
+  { day: 5, coins: 300, special: null },
+  { day: 6, coins: 400, special: null },
+  { day: 7, coins: 500, special: "bonus" },
 ];
 
 // Weekly events
 export const WEEKLY_EVENTS = [
-  { id: "word_rush", name: "Word Rush Weekend", emoji: "⚡", target: 30, reward: { coins: 500, gems: 10 } },
-  { id: "perfect_week", name: "Perfect Week", emoji: "✨", target: 7, reward: { coins: 750, gems: 15 } },
-  { id: "streak_challenge", name: "Streak Challenge", emoji: "🔥", target: 5, reward: { coins: 400, gems: 8 } },
+  { id: "word_rush", name: "Word Rush Weekend", emoji: "⚡", target: 30, reward: { coins: 500 } },
+  { id: "perfect_week", name: "Perfect Week", emoji: "✨", target: 7, reward: { coins: 750 } },
+  { id: "streak_challenge", name: "Streak Challenge", emoji: "🔥", target: 5, reward: { coins: 400 } },
 ];
 
 // Celebration messages
 export const CELEBRATION_MESSAGES = [
   { text: "AMAZING!", emoji: "🌟", color: "from-gray-800 to-black" },
   { text: "FANTASTIC!", emoji: "🎉", color: "from-blue-600 to-blue-800" },
-  { text: "BRILLIANT!", emoji: "💎", color: "from-gray-700 to-gray-900" },
+  { text: "BRILLIANT!", emoji: "💫", color: "from-gray-700 to-gray-900" },
   { text: "SUPERSTAR!", emoji: "⭐", color: "from-black to-gray-800" },
   { text: "INCREDIBLE!", emoji: "🚀", color: "from-blue-700 to-indigo-900" },
 ];
@@ -214,15 +204,16 @@ export function canAffordLevel(state: EngagementState, difficulty: "easy" | "med
   return state.coins >= LEVEL_COSTS[difficulty];
 }
 
-// Spend gems to unlock a zone
-export function spendGems(state: EngagementState, amount: number): EngagementState | null {
-  if (state.gems < amount) {
+// Spend coins to unlock a zone
+export function spendCoins(state: EngagementState, amount: number): EngagementState | null {
+  if (state.coins < amount) {
     return null;
   }
   
   return {
     ...state,
-    gems: state.gems - amount,
+    coins: state.coins - amount,
+    totalCoinsSpent: state.totalCoinsSpent + amount,
   };
 }
 
@@ -231,14 +222,6 @@ export function addCoins(state: EngagementState, amount: number): EngagementStat
   return {
     ...state,
     coins: state.coins + amount,
-  };
-}
-
-// Add gems
-export function addGems(state: EngagementState, amount: number): EngagementState {
-  return {
-    ...state,
-    gems: state.gems + amount,
   };
 }
 
@@ -259,7 +242,6 @@ export function completeWord(state: EngagementState): EngagementState {
   if (!newState.dailyChallengeCompleted && newState.dailyChallengeProgress >= newState.dailyChallengeTarget) {
     newState.dailyChallengeCompleted = true;
     newState.coins += 200; // Bonus coins
-    newState.gems += 2;
   }
   
   // Update event progress
@@ -270,16 +252,10 @@ export function completeWord(state: EngagementState): EngagementState {
   return newState;
 }
 
-// Complete a level - earn bonus coins
+// Complete a level
 export function completeLevel(state: EngagementState, perfect: boolean = false): EngagementState {
-  const baseCoins = 30;
-  const perfectBonus = perfect ? 50 : 0;
-  const gemBonus = perfect ? 1 : 0;
-  
   return {
     ...state,
-    coins: state.coins + baseCoins + perfectBonus,
-    gems: state.gems + gemBonus,
     levelsCompletedToday: state.levelsCompletedToday + 1,
     perfectLevels: perfect ? state.perfectLevels + 1 : state.perfectLevels,
   };
@@ -313,7 +289,6 @@ export function claimDailyReward(state: EngagementState): { newState: Engagement
   const newState: EngagementState = {
     ...state,
     coins: state.coins + reward.coins,
-    gems: state.gems + reward.gems,
     dailyRewardDay: state.dailyRewardDay + 1,
     lastDailyRewardClaimed: today,
     dailyRewardStreak: newStreak,
