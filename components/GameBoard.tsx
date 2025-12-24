@@ -6,9 +6,11 @@ import { DraggableLetter } from "./DraggableLetter";
 import { WordSlot } from "./WordSlot";
 import { LEVELS } from "@/data/levels";
 import { shuffleArray, getRandomPosition, cn, speak } from "@/lib/utils";
+import { getRandomNearMiss, EngagementState } from "@/lib/engagement";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { Sparkles, Zap, AlertCircle } from "lucide-react";
 
 interface GameBoardProps {
   level: number;
@@ -16,6 +18,8 @@ interface GameBoardProps {
   onWordComplete: () => void;
   onLevelComplete: () => void;
   onWordIndexChange?: (newIndex: number) => void;
+  onMistake?: () => void;
+  engagement?: EngagementState | null;
 }
 
 interface LetterItem {
@@ -29,7 +33,18 @@ interface LetterItem {
 
 const COLORS = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#FF9F1C", "#457B9D", "#9B59B6", "#F06292"];
 
-export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, onWordIndexChange }: GameBoardProps) => {
+// Encouraging messages for correct placements (variable rewards)
+const CORRECT_MESSAGES = ["Nice! ✨", "Great! 🌟", "Perfect! 💫", "Awesome! ⚡", "Yes! 🎯"];
+
+export const GameBoard = ({ 
+  level, 
+  wordIndex, 
+  onWordComplete, 
+  onLevelComplete, 
+  onWordIndexChange,
+  onMistake,
+  engagement 
+}: GameBoardProps) => {
   const currentLevel = LEVELS.find((l) => l.level === level)!;
   const currentWordData = currentLevel.words[wordIndex];
   const word = currentWordData.word;
@@ -54,6 +69,10 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
   );
   
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
+  const [showFeedback, setShowFeedback] = useState<{ type: "correct" | "incorrect"; message: string } | null>(null);
+  const [mistakeCount, setMistakeCount] = useState(0);
+  const [showNearMiss, setShowNearMiss] = useState(false);
+  const [nearMissMessage, setNearMissMessage] = useState("");
   
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -89,15 +108,48 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       newLetters[letterIndex].status = "correct";
       setLetters(newLetters);
 
+      // Show positive feedback (variable reward - random message)
+      const message = CORRECT_MESSAGES[Math.floor(Math.random() * CORRECT_MESSAGES.length)];
+      setShowFeedback({ type: "correct", message });
+      setTimeout(() => setShowFeedback(null), 800);
+
+      // Small confetti burst for each correct letter
+      confetti({
+        particleCount: 30,
+        spread: 40,
+        origin: { x: dropX / window.innerWidth, y: dropY / window.innerHeight },
+        colors: [letter.color],
+        scalar: 0.8,
+      });
+
       // Check if word is complete
       if (newPlaced.every((p) => p !== null)) {
         handleWordComplete();
       }
     } else {
-      // Incorrect placement
+      // Incorrect placement - Loss Aversion trigger
       const newLetters = [...letters];
       newLetters[letterIndex].status = "incorrect";
       setLetters(newLetters);
+      
+      // Increment mistake count
+      const newMistakeCount = mistakeCount + 1;
+      setMistakeCount(newMistakeCount);
+      
+      // Notify parent about mistake (affects "perfect" status)
+      onMistake?.();
+
+      // Show negative feedback
+      setShowFeedback({ type: "incorrect", message: "Try again! 🎯" });
+      setTimeout(() => setShowFeedback(null), 800);
+
+      // Near-miss psychology: After 3 mistakes, show encouraging message
+      if (newMistakeCount >= 3 && newMistakeCount % 2 === 1) {
+        const nearMiss = getRandomNearMiss();
+        setNearMissMessage(nearMiss);
+        setShowNearMiss(true);
+        setTimeout(() => setShowNearMiss(false), 2500);
+      }
       
       // Reset status after animation
       setTimeout(() => {
@@ -116,6 +168,7 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
 
     speak(word);
     setShowCompletionOverlay(true);
+    setMistakeCount(0); // Reset for next word
 
     setTimeout(() => {
       setShowCompletionOverlay(false);
@@ -126,6 +179,10 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
       }
     }, 2500); // 2.5 seconds to show the image and progress
   };
+
+  // Calculate remaining letters
+  const remainingLetters = letters.filter(l => l.status !== "correct").length;
+  const progress = ((word.length - remainingLetters) / word.length) * 100;
 
   return (
     <div className="relative w-full h-[100dvh] flex flex-col items-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 overflow-hidden touch-none">
@@ -153,6 +210,39 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
         </motion.div>
       </div>
 
+      {/* Near-Miss Encouragement Overlay */}
+      <AnimatePresence>
+        {showNearMiss && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[80] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3"
+          >
+            <Zap className="w-6 h-6 animate-pulse" />
+            <span className="font-bold text-lg">{nearMissMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Feedback Toast */}
+      <AnimatePresence>
+        {showFeedback && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: -20 }}
+            className={`fixed top-1/3 left-1/2 -translate-x-1/2 z-[70] px-6 py-3 rounded-2xl shadow-xl font-black text-xl ${
+              showFeedback.type === "correct" 
+                ? "bg-gradient-to-r from-green-400 to-emerald-500 text-white" 
+                : "bg-gradient-to-r from-red-400 to-pink-500 text-white"
+            }`}
+          >
+            {showFeedback.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top Section with Title */}
       <div className="relative z-10 w-full pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-2 md:pb-3 text-center pointer-events-none px-2 flex-shrink-0">
         <motion.h2 
@@ -166,6 +256,14 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
           <span>Drag and drop to spell</span>
         </div>
       </div>
+
+      {/* Progress indicator at top */}
+      <motion.div
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: progress / 100 }}
+        className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-400 to-emerald-500 origin-left z-50"
+        style={{ width: "100%" }}
+      />
 
       {/* Target Word Display - Centered */}
       <div className="relative z-10 flex-shrink-0 flex flex-wrap gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 items-center justify-center px-2 sm:px-4 py-2 sm:py-3 md:py-4 max-w-[95%] sm:max-w-full">
@@ -213,16 +311,26 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
                   fill
                   className="object-cover"
                 />
+                {/* Sparkle overlay */}
+                <motion.div
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent"
+                />
               </motion.div>
             )}
-            <motion.h2
+            <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.2 }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-blue-600 mb-1 px-3"
+              className="flex items-center gap-2 mb-1"
             >
-              {word}!
-            </motion.h2>
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-blue-600">
+                {word}!
+              </h2>
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+            </motion.div>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -231,6 +339,18 @@ export const GameBoard = ({ level, wordIndex, onWordComplete, onLevelComplete, o
             >
               Word {wordIndex + 1}/{currentLevel.words.length} Completed
             </motion.p>
+            
+            {/* Bonus indicator if no mistakes */}
+            {mistakeCount === 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-3 flex items-center gap-1 bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold"
+              >
+                ⭐ Perfect! Bonus coins!
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
