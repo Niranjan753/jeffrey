@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Lightbulb, RotateCcw, Check } from "lucide-react";
+import { Clock, Lightbulb, RotateCcw, Check, X } from "lucide-react";
 import { cn, shuffleArray } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
@@ -16,9 +16,10 @@ interface ScrambleGameProps {
   timeLimit: number;
   onComplete: (perfect: boolean) => void;
   onWordComplete: () => void;
+  onRestart: () => void;
 }
 
-export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: ScrambleGameProps) {
+export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete, onRestart }: ScrambleGameProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scrambledLetters, setScrambledLetters] = useState<string[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
@@ -26,7 +27,9 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
   const [showHint, setShowHint] = useState(false);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showTimeUp, setShowTimeUp] = useState(false);
   const [shake, setShake] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
 
   const currentWord = words[currentIndex];
 
@@ -48,17 +51,26 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
   }, [currentWord, scrambleWord]);
 
   useEffect(() => {
+    if (gameEnded) return;
+    
     if (timeLeft <= 0) {
-      onComplete(false);
+      setShowTimeUp(true);
+      setGameEnded(true);
       return;
     }
     const timer = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, onComplete]);
+  }, [timeLeft, gameEnded]);
+
+  const handleRestart = () => {
+    onRestart();
+  };
 
   const handleLetterClick = (index: number) => {
+    if (gameEnded) return;
+    
     if (selectedIndices.includes(index)) {
       setSelectedIndices((prev) => prev.filter((i) => i !== index));
     } else {
@@ -78,6 +90,7 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
               setCurrentIndex((prev) => prev + 1);
               onWordComplete();
             } else {
+              setGameEnded(true);
               onComplete(hintsUsed === 0);
             }
           }, 800);
@@ -93,16 +106,17 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
   };
 
   const handleReshuffle = () => {
+    if (gameEnded) return;
     setScrambledLetters(scrambleWord(currentWord.word));
     setSelectedIndices([]);
   };
 
   const handleShowHint = () => {
+    if (gameEnded) return;
     setShowHint(true);
     setHintsUsed((prev) => prev + 1);
   };
 
-  const selectedWord = selectedIndices.map((i) => scrambledLetters[i]).join("");
   const timePercentage = (timeLeft / timeLimit) * 100;
   const isLowTime = timeLeft <= 10;
 
@@ -129,16 +143,17 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
         <div className="flex items-center gap-2">
           <button
             onClick={handleReshuffle}
-            className="p-3 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            disabled={gameEnded}
+            className="p-3 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <RotateCcw className="w-5 h-5" />
           </button>
           <button
             onClick={handleShowHint}
-            disabled={showHint}
+            disabled={showHint || gameEnded}
             className={cn(
               "p-3 rounded-full transition-colors",
-              showHint ? "bg-gray-100 text-gray-300" : "bg-[#0a33ff] text-white hover:bg-[#0829cc]"
+              showHint || gameEnded ? "bg-gray-100 text-gray-300" : "bg-[#0a33ff] text-white hover:bg-[#0829cc]"
             )}
           >
             <Lightbulb className="w-5 h-5" />
@@ -213,7 +228,7 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
                 transition={{ delay: i * 0.03 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleLetterClick(i)}
-                disabled={showSuccess}
+                disabled={showSuccess || gameEnded}
                 className={cn(
                   "w-14 h-14 rounded-xl text-xl font-bold transition-all",
                   isSelected
@@ -246,6 +261,39 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete }: S
                 <Check className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-black">{currentWord.word}</h2>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Time's Up Overlay */}
+      <AnimatePresence>
+        {showTimeUp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="text-center px-6"
+            >
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-10 h-10 text-gray-400" />
+              </div>
+              <h2 className="text-3xl font-bold text-black mb-2">Time's Up!</h2>
+              <p className="text-gray-500 mb-8">
+                You completed {currentIndex} of {words.length} words
+              </p>
+              <button
+                onClick={handleRestart}
+                className="px-8 py-4 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors flex items-center gap-2 mx-auto"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Restart Level
+              </button>
             </motion.div>
           </motion.div>
         )}
