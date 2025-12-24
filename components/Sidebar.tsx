@@ -45,7 +45,7 @@ export function Sidebar() {
         {/* Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-10 w-6 h-6 bg-black rounded-full flex items-center justify-center text-white z-[110] hover:bg-gray-800 transition-colors"
+          className="absolute -right-3 top-10 w-6 h-6 bg-black rounded-full flex items-center justify-center text-white z-[110] hover:bg-gray-800 transition-colors cursor-pointer"
         >
           {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
         </button>
@@ -70,7 +70,7 @@ export function Sidebar() {
               <Link key={item.label} href={item.href}>
                 <div
                   className={cn(
-                    "w-full flex items-center gap-3 p-3 rounded-xl transition-colors",
+                    "w-full flex items-center gap-3 p-3 rounded-xl transition-colors cursor-pointer",
                     isCollapsed ? "justify-center" : "justify-start",
                     isActive 
                       ? "bg-[#0a33ff] text-white" 
@@ -90,7 +90,7 @@ export function Sidebar() {
           <button
             onClick={handleLogout}
             className={cn(
-              "w-full flex items-center gap-3 p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-black transition-colors",
+              "w-full flex items-center gap-3 p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-black transition-colors cursor-pointer",
               isCollapsed ? "justify-center" : "justify-start"
             )}
           >
@@ -104,7 +104,7 @@ export function Sidebar() {
       <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-100 z-[100] flex items-center justify-between px-4">
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 -ml-2 text-gray-600"
+          className="p-2 -ml-2 text-gray-600 cursor-pointer"
         >
           <div className="w-5 h-4 flex flex-col justify-between">
             <span className="w-full h-0.5 bg-black rounded-full" />
@@ -150,7 +150,7 @@ export function Sidebar() {
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <ChevronLeft size={20} className="text-gray-600" />
                 </button>
@@ -163,7 +163,7 @@ export function Sidebar() {
                     <Link key={item.label} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
                       <div
                         className={cn(
-                          "w-full flex items-center gap-3 p-4 rounded-xl transition-colors",
+                          "w-full flex items-center gap-3 p-4 rounded-xl transition-colors cursor-pointer",
                           isActive 
                             ? "bg-[#0a33ff] text-white" 
                             : "text-gray-500 hover:bg-gray-50"
@@ -180,7 +180,7 @@ export function Sidebar() {
               <div className="p-4 border-t border-gray-100">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 p-4 rounded-xl text-gray-400 hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-3 p-4 rounded-xl text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <LogOut size={20} />
                   <span className="font-medium">Logout</span>

@@ -104,7 +104,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
             <div className="flex items-center gap-2">
               <button
                 onClick={onBuyCoins}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <Coins className="w-4 h-4 text-black" />
                 <span className="font-semibold text-black text-sm">{engagement.coins}</span>
@@ -128,8 +128,8 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
           animate={{ y: 0, opacity: 1 }}
           className="px-4 pt-4 max-w-4xl mx-auto"
         >
-          <a href="/rewards" className="block">
-            <div className="bg-[#0a33ff] text-white rounded-xl p-4 flex items-center justify-between">
+          <a href="/rewards" className="block cursor-pointer">
+            <div className="bg-[#0a33ff] text-white rounded-xl p-4 flex items-center justify-between cursor-pointer">
               <div>
                 <p className="font-bold">Daily Reward Ready!</p>
                 <p className="text-sm text-white/80">Tap to claim your coins</p>
@@ -182,7 +182,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleZoneClick(zone)}
                     className={cn(
-                      "text-left p-4 rounded-xl border-2 transition-all",
+                      "text-left p-4 rounded-xl border-2 transition-all cursor-pointer",
                       isUnlocked
                         ? "bg-white border-gray-200 hover:border-black"
                         : "bg-gray-50 border-gray-100 opacity-75 hover:opacity-100"
@@ -243,7 +243,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setSelectedZone(null)}
-                  className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4 rotate-180 text-gray-600" />
                 </button>
@@ -271,7 +271,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
                     onClick={() => onSelectLevel(selectedZone, level)}
                     disabled={!canPlay}
                     className={cn(
-                      "p-4 rounded-xl border-2 text-left transition-all",
+                      "p-4 rounded-xl border-2 text-left transition-all cursor-pointer disabled:cursor-not-allowed",
                       isCompleted
                         ? "bg-gray-50 border-gray-200"
                         : canPlay
@@ -365,7 +365,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowUnlockModal(null)}
-                    className="flex-1 py-3 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="flex-1 py-3 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -373,7 +373,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
                   {engagement && engagement.coins >= showUnlockModal.unlockCost ? (
                     <button
                       onClick={() => handleUnlockZone(showUnlockModal)}
-                      className="flex-1 py-3 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors"
+                      className="flex-1 py-3 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors cursor-pointer"
                     >
                       Unlock
                     </button>
@@ -383,7 +383,7 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onB
                         setShowUnlockModal(null);
                         onBuyCoins();
                       }}
-                      className="flex-1 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Buy Coins

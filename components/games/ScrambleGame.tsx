@@ -230,7 +230,7 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete, onR
                 onClick={() => handleLetterClick(i)}
                 disabled={showSuccess || gameEnded}
                 className={cn(
-                  "w-14 h-14 rounded-xl text-xl font-bold transition-all",
+                  "w-14 h-14 rounded-xl text-xl font-bold transition-all cursor-pointer disabled:cursor-not-allowed",
                   isSelected
                     ? "bg-gray-100 text-gray-300"
                     : "bg-[#0a33ff] text-white hover:bg-[#0829cc]"
@@ -289,7 +289,7 @@ export function ScrambleGame({ words, timeLimit, onComplete, onWordComplete, onR
               </p>
               <button
                 onClick={handleRestart}
-                className="px-8 py-4 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors flex items-center gap-2 mx-auto"
+                className="px-8 py-4 bg-[#0a33ff] text-white rounded-xl font-semibold hover:bg-[#0829cc] transition-colors flex items-center gap-2 mx-auto cursor-pointer"
               >
                 <RotateCcw className="w-5 h-5" />
                 Restart Level
