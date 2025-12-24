@@ -4,13 +4,13 @@
 import { useState, useRef } from "react";
 import { DraggableLetter } from "./DraggableLetter";
 import { WordSlot } from "./WordSlot";
-import { LEVELS } from "@/data/levels";
+import { LEVELS, WordData } from "@/data/levels";
 import { shuffleArray, getRandomPosition, cn, speak } from "@/lib/utils";
 import { getRandomNearMiss, EngagementState } from "@/lib/engagement";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Sparkles, Zap, AlertCircle } from "lucide-react";
+import { Sparkles, Zap } from "lucide-react";
 
 interface GameBoardProps {
   level: number;
@@ -20,6 +20,7 @@ interface GameBoardProps {
   onWordIndexChange?: (newIndex: number) => void;
   onMistake?: () => void;
   engagement?: EngagementState | null;
+  customWords?: WordData[];
 }
 
 interface LetterItem {
@@ -43,11 +44,14 @@ export const GameBoard = ({
   onLevelComplete, 
   onWordIndexChange,
   onMistake,
-  engagement 
+  engagement,
+  customWords
 }: GameBoardProps) => {
-  const currentLevel = LEVELS.find((l) => l.level === level)!;
-  const currentWordData = currentLevel.words[wordIndex];
-  const word = currentWordData.word;
+  // Use custom words if provided, otherwise fall back to legacy levels
+  const words = customWords || LEVELS.find((l) => l.level === level)?.words || [];
+  const currentWordData = words[wordIndex];
+  const totalWords = words.length;
+  const word = currentWordData?.word || "";
 
   const [letters, setLetters] = useState<LetterItem[]>(() => {
     const chars = word.split("").map((char, index) => {
@@ -172,7 +176,7 @@ export const GameBoard = ({
 
     setTimeout(() => {
       setShowCompletionOverlay(false);
-      if (wordIndex === currentLevel.words.length - 1) {
+      if (wordIndex === totalWords - 1) {
         onLevelComplete();
       } else {
         onWordComplete();
@@ -337,7 +341,7 @@ export const GameBoard = ({
               transition={{ delay: 0.3, duration: 0.3 }}
               className="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-gray-400 uppercase tracking-widest px-4 text-center"
             >
-              Word {wordIndex + 1}/{currentLevel.words.length} Completed
+              Word {wordIndex + 1}/{totalWords} Completed
             </motion.p>
             
             {/* Bonus indicator if no mistakes */}
@@ -394,7 +398,7 @@ export const GameBoard = ({
           <div className="h-4 sm:h-5 md:h-7 w-px bg-gray-200 flex-shrink-0" />
           
           <div className="flex gap-1 sm:gap-1.5 md:gap-2 flex-wrap justify-center">
-            {currentLevel.words.map((_, i) => {
+            {words.map((_, i) => {
               const isClickable = i <= wordIndex;
               const isCompleted = i < wordIndex;
               const isCurrent = i === wordIndex;
@@ -428,7 +432,7 @@ export const GameBoard = ({
           <div className="h-6 sm:h-8 w-px bg-gray-200 hidden sm:block flex-shrink-0" />
           
           <span className="text-xs sm:text-sm lg:text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hidden sm:inline flex-shrink-0">
-            {wordIndex + 1}/{currentLevel.words.length}
+            {wordIndex + 1}/{totalWords}
           </span>
         </motion.div>
       </div>
