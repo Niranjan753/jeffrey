@@ -2,7 +2,7 @@
 
 import { Sidebar } from "@/components/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, Flame, Clock, Zap, Heart, Gem, Coins, Check, Lock } from "lucide-react";
+import { Gift, Flame, Clock, Zap, Gem, Coins, Check, Lock, Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   loadEngagementState,
@@ -10,10 +10,10 @@ import {
   claimDailyReward,
   isDailyRewardAvailable,
   DAILY_REWARDS,
+  COIN_PACKAGES,
   getCurrentEvent,
   startWeeklyEvent,
   formatTimeRemaining,
-  getTimeUntilNextLife,
   EngagementState,
 } from "@/lib/engagement";
 import confetti from "canvas-confetti";
@@ -23,7 +23,7 @@ export default function RewardsPage() {
   const [engagement, setEngagement] = useState<EngagementState | null>(null);
   const [showRewardPopup, setShowRewardPopup] = useState(false);
   const [claimedReward, setClaimedReward] = useState<typeof DAILY_REWARDS[0] | null>(null);
-  const [timeUntilLife, setTimeUntilLife] = useState<number | null>(null);
+  const [showBuyCoins, setShowBuyCoins] = useState(false);
 
   useEffect(() => {
     const state = loadEngagementState();
@@ -34,19 +34,6 @@ export default function RewardsPage() {
       saveEngagementState(newState);
     }
   }, []);
-
-  useEffect(() => {
-    if (!engagement) return;
-    const interval = setInterval(() => {
-      const time = getTimeUntilNextLife(engagement);
-      setTimeUntilLife(time);
-      const newState = loadEngagementState();
-      if (newState.lives !== engagement.lives) {
-        setEngagement(newState);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [engagement]);
 
   const handleClaimDaily = () => {
     if (!engagement) return;
@@ -62,7 +49,7 @@ export default function RewardsPage() {
 
   const canClaimDaily = engagement ? isDailyRewardAvailable(engagement) : false;
   const currentEvent = engagement ? getCurrentEvent(engagement) : null;
-  const nextDayReward = engagement ? DAILY_REWARDS[(engagement.dailyRewardDay + 1) % 7] : DAILY_REWARDS[0];
+  const nextDayReward = engagement ? DAILY_REWARDS[(engagement.dailyRewardDay) % 7] : DAILY_REWARDS[0];
 
   if (!engagement) {
     return (
@@ -89,17 +76,14 @@ export default function RewardsPage() {
 
             {/* Stats Bar */}
             <div className="flex flex-wrap gap-3 mb-8">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white">
-                <Heart className="w-4 h-4 text-black fill-black" />
-                <span className="font-semibold text-black">{engagement.lives}/{engagement.maxLives}</span>
-                {timeUntilLife && engagement.lives < engagement.maxLives && (
-                  <span className="text-xs text-gray-400 ml-1">{formatTimeRemaining(timeUntilLife)}</span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white">
+              <button 
+                onClick={() => setShowBuyCoins(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors group"
+              >
                 <Coins className="w-4 h-4 text-black" />
                 <span className="font-semibold text-black">{engagement.coins.toLocaleString()}</span>
-              </div>
+                <Plus className="w-3 h-3 text-gray-400 group-hover:text-[#0a33ff]" />
+              </button>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white">
                 <Gem className="w-4 h-4 text-[#0a33ff]" />
                 <span className="font-semibold text-black">{engagement.gems}</span>
@@ -128,24 +112,18 @@ export default function RewardsPage() {
                     {canClaimDaily ? "Daily Reward Ready!" : "Come Back Tomorrow"}
                   </h2>
                   <p className="text-gray-500 text-sm mb-3">
-                    {canClaimDaily ? `Day ${(engagement.dailyRewardDay + 1)} reward` : "Keep your streak going"}
+                    {canClaimDaily ? `Day ${(engagement.dailyRewardDay % 7) + 1} reward` : "Keep your streak going"}
                   </p>
                   
                   <div className="flex items-center justify-center md:justify-start gap-4 text-sm">
                     <div className="flex items-center gap-1">
                       <Coins className="w-4 h-4 text-black" />
-                      <span className="font-semibold">{nextDayReward.coins}</span>
+                      <span className="font-semibold text-black">{nextDayReward.coins}</span>
                     </div>
                     {nextDayReward.gems > 0 && (
                       <div className="flex items-center gap-1">
                         <Gem className="w-4 h-4 text-[#0a33ff]" />
-                        <span className="font-semibold">{nextDayReward.gems}</span>
-                      </div>
-                    )}
-                    {nextDayReward.lives > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-4 h-4 text-black" />
-                        <span className="font-semibold">+{nextDayReward.lives}</span>
+                        <span className="font-semibold text-black">{nextDayReward.gems}</span>
                       </div>
                     )}
                   </div>
@@ -172,22 +150,22 @@ export default function RewardsPage() {
                 <h3 className="font-bold text-black">7-Day Calendar</h3>
                 <div className="flex items-center gap-1 text-sm">
                   <Flame className="w-4 h-4 text-black" />
-                  <span className="font-semibold">{engagement.dailyRewardStreak} days</span>
+                  <span className="font-semibold text-black">{engagement.dailyRewardStreak} days</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-7 gap-2">
                 {DAILY_REWARDS.map((reward, index) => {
-                  const isPast = index < engagement.dailyRewardDay;
-                  const isCurrent = index === engagement.dailyRewardDay;
-                  const isFuture = index > engagement.dailyRewardDay;
+                  const isPast = index < (engagement.dailyRewardDay % 7);
+                  const isCurrent = index === (engagement.dailyRewardDay % 7);
+                  const isFuture = index > (engagement.dailyRewardDay % 7);
 
                   return (
                     <div
                       key={index}
                       className={cn(
                         "relative p-2 md:p-3 rounded-xl text-center transition-all",
-                        isPast ? "bg-black text-white" : isCurrent ? "bg-[#0a33ff] text-white" : "bg-gray-100 text-gray-400"
+                        isPast ? "bg-black text-white" : isCurrent && canClaimDaily ? "bg-[#0a33ff] text-white" : isCurrent ? "bg-gray-200 text-gray-600" : "bg-gray-100 text-gray-400"
                       )}
                     >
                       {isFuture && (
@@ -223,7 +201,7 @@ export default function RewardsPage() {
                       <span className="text-[10px] font-semibold text-[#0a33ff] bg-blue-50 px-2 py-0.5 rounded">TODAY</span>
                     )}
                   </div>
-                  <p className="text-gray-500 text-sm">Complete {engagement.dailyChallengeTarget} words</p>
+                  <p className="text-gray-500 text-sm">Complete {engagement.dailyChallengeTarget} words • Reward: 200 coins + 2 gems</p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-black">
@@ -249,7 +227,7 @@ export default function RewardsPage() {
 
             {/* Limited-Time Event */}
             {currentEvent && (
-              <div className="rounded-2xl p-6 bg-black text-white">
+              <div className="rounded-2xl p-6 bg-black text-white mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{currentEvent.emoji}</span>
@@ -272,6 +250,21 @@ export default function RewardsPage() {
                 </div>
               </div>
             )}
+
+            {/* Buy Coins Section */}
+            <div className="rounded-2xl p-6 border border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-black">Need more coins?</h3>
+                <button 
+                  onClick={() => setShowBuyCoins(true)}
+                  className="px-4 py-2 bg-[#0a33ff] text-white rounded-xl font-semibold text-sm hover:bg-[#0829cc] transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Buy Coins
+                </button>
+              </div>
+              <p className="text-gray-500 text-sm">Purchase coins to unlock more levels and keep playing!</p>
+            </div>
           </div>
         </div>
       </main>
@@ -316,15 +309,6 @@ export default function RewardsPage() {
                     <div className="text-xl font-bold text-[#0a33ff]">+{claimedReward.gems}</div>
                   </div>
                 )}
-
-                {claimedReward.lives > 0 && (
-                  <div className="text-center">
-                    <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center mb-2">
-                      <Heart className="w-7 h-7 text-black" />
-                    </div>
-                    <div className="text-xl font-bold text-black">+{claimedReward.lives}</div>
-                  </div>
-                )}
               </div>
 
               <button
@@ -333,6 +317,68 @@ export default function RewardsPage() {
               >
                 Continue
               </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Buy Coins Modal */}
+      <AnimatePresence>
+        {showBuyCoins && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setShowBuyCoins(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-black">Buy Coins</h2>
+                <button
+                  onClick={() => setShowBuyCoins(false)}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {COIN_PACKAGES.map((pkg) => (
+                  <button
+                    key={pkg.id}
+                    className={cn(
+                      "w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all hover:border-gray-300",
+                      pkg.popular ? "border-[#0a33ff] bg-blue-50/30" : "border-gray-200"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <Coins className="w-6 h-6 text-black" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-black">{pkg.coins.toLocaleString()} Coins</div>
+                        {pkg.popular && (
+                          <span className="text-xs font-semibold text-[#0a33ff]">BEST VALUE</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-black">{pkg.price}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs text-gray-400 text-center mt-6">
+                Purchases will be available soon
+              </p>
             </motion.div>
           </motion.div>
         )}

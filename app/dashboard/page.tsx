@@ -5,7 +5,7 @@ import { GameBoard } from "@/components/GameBoard";
 import { GameZoneMap } from "@/components/GameZoneMap";
 import { ScrambleGame, CrosswordGame, WordSearchGame, MatchGame } from "@/components/games";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Heart, Gem, Coins, Flame, Clock } from "lucide-react";
+import { ChevronLeft, Gem, Coins, Flame, Plus, X } from "lucide-react";
 import { MusicControl } from "@/components/MusicControl";
 import { playLevelWinSound } from "@/lib/utils";
 import { Sidebar } from "@/components/Sidebar";
@@ -15,15 +15,16 @@ import {
   saveEngagementState,
   completeWord,
   completeLevel,
-  loseLife,
-  getTimeUntilNextLife,
-  formatTimeRemaining,
-  buyLivesWithGems,
+  spendCoinsForLevel,
+  canAffordLevel,
+  LEVEL_COSTS,
+  COIN_PACKAGES,
   EngagementState,
 } from "@/lib/engagement";
 import confetti from "canvas-confetti";
+import { cn } from "@/lib/utils";
 
-type GameState = "menu" | "playing" | "level_complete" | "no_lives";
+type GameState = "menu" | "playing" | "level_complete" | "no_coins";
 
 const getZoneProgress = (): Record<string, string[]> => {
   if (typeof window === "undefined") return {};
@@ -42,9 +43,9 @@ export default function Dashboard() {
   const [currentLevel, setCurrentLevel] = useState<ZoneLevel | null>(null);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [engagement, setEngagement] = useState<EngagementState | null>(null);
-  const [timeUntilLife, setTimeUntilLife] = useState<number | null>(null);
   const [coinsEarned, setCoinsEarned] = useState(0);
   const [perfectLevel, setPerfectLevel] = useState(false);
+  const [showBuyCoins, setShowBuyCoins] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -52,25 +53,26 @@ export default function Dashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!engagement) return;
-    const interval = setInterval(() => {
-      const time = getTimeUntilNextLife(engagement);
-      setTimeUntilLife(time);
-      const newState = loadEngagementState();
-      if (newState.lives !== engagement.lives) {
-        setEngagement(newState);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [engagement]);
-
   const handleSelectLevel = (zone: GameZone, level: ZoneLevel) => {
     if (!engagement) return;
-    if (engagement.lives <= 0) {
-      setGameState("no_lives");
+    
+    const difficulty = level.difficulty || "easy";
+    
+    // Check if player can afford to play
+    if (!canAffordLevel(engagement, difficulty)) {
+      setGameState("no_coins");
       return;
     }
+    
+    // Spend coins to play
+    const newState = spendCoinsForLevel(engagement, difficulty);
+    if (!newState) {
+      setGameState("no_coins");
+      return;
+    }
+    
+    setEngagement(newState);
+    saveEngagementState(newState);
     setCurrentZone(zone);
     setCurrentLevel(level);
     setCurrentWordIndex(0);
@@ -103,32 +105,14 @@ export default function Dashboard() {
     const newState = completeLevel(engagement, perfect);
     setEngagement(newState);
     saveEngagementState(newState);
-    setCoinsEarned(perfect ? 100 : 50);
+    setCoinsEarned(perfect ? 80 : 30);
     playLevelWinSound();
     confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ["#0a33ff", "#000000"] });
     setGameState("level_complete");
   };
 
   const handleGiveUp = () => {
-    if (!engagement) return;
-    const newState = loseLife(engagement);
-    setEngagement(newState);
-    saveEngagementState(newState);
-    if (newState.lives <= 0) {
-      setGameState("no_lives");
-    } else {
-      goBackToMenu();
-    }
-  };
-
-  const handleBuyLives = () => {
-    if (!engagement) return;
-    const newState = buyLivesWithGems(engagement);
-    if (newState) {
-      setEngagement(newState);
-      saveEngagementState(newState);
-      setGameState("menu");
-    }
+    goBackToMenu();
   };
 
   const goBackToMenu = () => {
@@ -138,10 +122,18 @@ export default function Dashboard() {
   };
 
   const handlePlayNextLevel = () => {
-    if (!currentZone || !currentLevel) return;
+    if (!currentZone || !currentLevel || !engagement) return;
     const currentIndex = currentZone.levels.findIndex(l => l.id === currentLevel.id);
     if (currentIndex < currentZone.levels.length - 1) {
-      handleSelectLevel(currentZone, currentZone.levels[currentIndex + 1]);
+      const nextLevel = currentZone.levels[currentIndex + 1];
+      const difficulty = nextLevel.difficulty || "easy";
+      
+      if (!canAffordLevel(engagement, difficulty)) {
+        setGameState("no_coins");
+        return;
+      }
+      
+      handleSelectLevel(currentZone, nextLevel);
     } else {
       goBackToMenu();
     }
@@ -229,10 +221,6 @@ export default function Dashboard() {
             
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200">
-                <Heart className="w-4 h-4 text-black fill-black" />
-                <span className="font-semibold text-black text-sm">{engagement.lives}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200">
                 <Coins className="w-4 h-4 text-black" />
                 <span className="font-semibold text-black text-sm">{engagement.coins}</span>
               </div>
@@ -244,9 +232,10 @@ export default function Dashboard() {
               )}
             </div>
             
-            {currentZone && (
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{currentZone.emoji}</span>
+            {currentZone && currentLevel && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span>{currentZone.emoji}</span>
+                <span className="hidden md:inline">-{LEVEL_COSTS[currentLevel.difficulty || "easy"]} coins</span>
               </div>
             )}
           </motion.div>
@@ -266,6 +255,7 @@ export default function Dashboard() {
                   engagement={engagement}
                   onSelectLevel={handleSelectLevel}
                   onEngagementUpdate={setEngagement}
+                  onBuyCoins={() => setShowBuyCoins(true)}
                 />
               </motion.div>
             )}
@@ -344,9 +334,10 @@ export default function Dashboard() {
               </motion.div>
             )}
 
-            {gameState === "no_lives" && engagement && (
+            {/* No Coins Modal */}
+            {gameState === "no_coins" && engagement && (
               <motion.div
-                key="no-lives"
+                key="no-coins"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -358,46 +349,109 @@ export default function Dashboard() {
                   className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
                 >
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Heart className="w-8 h-8 text-black" />
+                    <Coins className="w-8 h-8 text-black" />
                   </div>
 
-                  <h2 className="text-2xl font-bold text-center text-black mb-2">Out of Lives</h2>
-                  <p className="text-gray-500 text-center mb-2">Lives regenerate over time</p>
-                  
-                  {timeUntilLife && (
-                    <div className="flex items-center justify-center gap-2 text-gray-600 mb-6">
-                      <Clock className="w-4 h-4" />
-                      <span className="font-medium">Next in {formatTimeRemaining(timeUntilLife)}</span>
-                    </div>
-                  )}
+                  <h2 className="text-2xl font-bold text-center text-black mb-2">Not Enough Coins</h2>
+                  <p className="text-gray-500 text-center mb-6">
+                    You need more coins to play this level
+                  </p>
+
+                  <div className="text-center text-sm text-gray-500 mb-6">
+                    Current balance: <span className="font-semibold text-black">{engagement.coins}</span> coins
+                  </div>
 
                   <div className="space-y-3">
                     <button
-                      onClick={handleBuyLives}
-                      disabled={engagement.gems < 3}
-                      className={`w-full py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 ${
-                        engagement.gems >= 3
-                          ? "bg-[#0a33ff] text-white hover:bg-[#0829cc]"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      }`}
+                      onClick={() => {
+                        setGameState("menu");
+                        setShowBuyCoins(true);
+                      }}
+                      className="w-full py-3 rounded-xl font-semibold bg-[#0a33ff] text-white hover:bg-[#0829cc] transition-colors flex items-center justify-center gap-2"
                     >
-                      <Gem className="w-4 h-4" />
-                      Refill Lives (3 Gems)
+                      <Plus className="w-4 h-4" />
+                      Buy Coins
                     </button>
 
                     <button
                       onClick={goBackToMenu}
                       className="w-full py-3 bg-gray-100 text-black rounded-xl font-semibold hover:bg-gray-200 transition-colors"
                     >
-                      Wait
+                      Go Back
                     </button>
                   </div>
+
+                  <p className="text-xs text-gray-400 mt-4 text-center">
+                    💡 Tip: Complete daily challenges for free coins!
+                  </p>
                 </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Buy Coins Modal */}
+      <AnimatePresence>
+        {showBuyCoins && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setShowBuyCoins(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-black">Buy Coins</h2>
+                <button
+                  onClick={() => setShowBuyCoins(false)}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {COIN_PACKAGES.map((pkg) => (
+                  <button
+                    key={pkg.id}
+                    className={cn(
+                      "w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all hover:border-gray-300",
+                      pkg.popular ? "border-[#0a33ff] bg-blue-50/30" : "border-gray-200"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <Coins className="w-6 h-6 text-black" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-black">{pkg.coins.toLocaleString()} Coins</div>
+                        {pkg.popular && (
+                          <span className="text-xs font-semibold text-[#0a33ff]">BEST VALUE</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-black">{pkg.price}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs text-gray-400 text-center mt-6">
+                Purchases will be available soon
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
