@@ -104,12 +104,12 @@ export const GAME_ZONES: GameZone[] = [
   // Zone 1: Word Spell (FREE)
   {
     id: "spell-meadow",
-    name: "Spelling Meadow",
-    emoji: "🌸",
+    name: "Spelling",
+    emoji: "✏️",
     gameType: "spell",
     description: "Arrange letters to spell words",
-    color: "#FF6B6B",
-    bgGradient: "from-pink-400 to-rose-500",
+    color: "#000000",
+    bgGradient: "from-gray-800 to-black",
     unlockCost: 0,
     levels: [
       {
@@ -166,27 +166,27 @@ export const GAME_ZONES: GameZone[] = [
         id: "spell-6",
         levelNum: 6,
         difficulty: "medium",
-        words: [
+    words: [
           { id: "s6-1", word: "MOUSE", image: "/mouse.jpeg" },
           { id: "s6-2", word: "TRAIN", image: "/train.jpeg" },
           { id: "s6-3", word: "WATER" },
-        ],
-      },
-      {
+    ],
+  },
+  {
         id: "spell-7",
         levelNum: 7,
         difficulty: "hard",
-        words: [
+    words: [
           { id: "s7-1", word: "BANANA" },
           { id: "s7-2", word: "ORANGE" },
           { id: "s7-3", word: "FLOWER" },
-        ],
-      },
-      {
+    ],
+  },
+  {
         id: "spell-8",
         levelNum: 8,
         difficulty: "hard",
-        words: [
+    words: [
           { id: "s8-1", word: "RAINBOW" },
           { id: "s8-2", word: "ELEPHANT" },
           { id: "s8-3", word: "BUTTERFLY" },
@@ -198,12 +198,12 @@ export const GAME_ZONES: GameZone[] = [
   // Zone 2: Word Scramble (FREE)
   {
     id: "scramble-canyon",
-    name: "Scramble Canyon",
-    emoji: "🌀",
+    name: "Scramble",
+    emoji: "🔀",
     gameType: "scramble",
     description: "Unscramble jumbled letters quickly",
-    color: "#4ECDC4",
-    bgGradient: "from-teal-400 to-cyan-500",
+    color: "#0a33ff",
+    bgGradient: "from-blue-600 to-blue-800",
     unlockCost: 0,
     levels: [
       {
@@ -278,12 +278,12 @@ export const GAME_ZONES: GameZone[] = [
   // Zone 3: Crossword (PREMIUM - 15 gems)
   {
     id: "crossword-castle",
-    name: "Crossword Castle",
-    emoji: "🏰",
+    name: "Crossword",
+    emoji: "🔲",
     gameType: "crossword",
     description: "Solve fun crossword puzzles",
-    color: "#9B59B6",
-    bgGradient: "from-purple-500 to-indigo-600",
+    color: "#374151",
+    bgGradient: "from-gray-600 to-gray-800",
     unlockCost: 15,
     levels: [
       {
@@ -351,12 +351,12 @@ export const GAME_ZONES: GameZone[] = [
   // Zone 4: Word Search (PREMIUM - 20 gems)
   {
     id: "search-jungle",
-    name: "Search Jungle",
-    emoji: "🌴",
+    name: "Word Search",
+    emoji: "🔍",
     gameType: "search",
     description: "Find hidden words in the grid",
-    color: "#27AE60",
-    bgGradient: "from-green-500 to-emerald-600",
+    color: "#1f2937",
+    bgGradient: "from-gray-700 to-gray-900",
     unlockCost: 20,
     levels: [
       {
@@ -458,12 +458,12 @@ export const GAME_ZONES: GameZone[] = [
   // Zone 5: Word Match (PREMIUM - 25 gems)
   {
     id: "match-mountain",
-    name: "Match Mountain",
-    emoji: "🏔️",
+    name: "Word Match",
+    emoji: "🎯",
     gameType: "match",
     description: "Match words to their pictures",
-    color: "#E74C3C",
-    bgGradient: "from-orange-500 to-red-600",
+    color: "#0a33ff",
+    bgGradient: "from-blue-700 to-indigo-900",
     unlockCost: 25,
     levels: [
       {
