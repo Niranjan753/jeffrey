@@ -3,17 +3,17 @@
 import { GAME_ZONES, GameZone, ZoneLevel } from "@/data/levels";
 import { cn } from "@/lib/utils";
 import { 
-  loadEngagementState, 
   saveEngagementState, 
   spendGems, 
   isDailyRewardAvailable,
   formatTimeRemaining,
-  getTimeUntilNextLife,
   getCurrentEvent,
+  LEVEL_COSTS,
+  canAffordLevel,
   EngagementState 
 } from "@/lib/engagement";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Lock, Gem, Coins, Gift, Flame, Clock, ChevronRight, ChevronLeft, Zap, Play } from "lucide-react";
+import { Lock, Gem, Coins, Gift, Flame, Clock, ChevronRight, ChevronLeft, Zap, Play, Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ interface GameZoneMapProps {
   engagement: EngagementState | null;
   onSelectLevel: (zone: GameZone, level: ZoneLevel) => void;
   onEngagementUpdate: (state: EngagementState) => void;
+  onBuyCoins?: () => void;
 }
 
 const getZoneProgress = (): Record<string, string[]> => {
@@ -43,26 +44,16 @@ const saveUnlockedZones = (zones: string[]) => {
   localStorage.setItem("word-game-unlocked-zones", JSON.stringify(zones));
 };
 
-export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: GameZoneMapProps) {
+export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate, onBuyCoins }: GameZoneMapProps) {
   const [selectedZone, setSelectedZone] = useState<GameZone | null>(null);
   const [zoneProgress, setZoneProgress] = useState<Record<string, string[]>>({});
   const [unlockedZones, setUnlockedZones] = useState<string[]>([]);
   const [showUnlockModal, setShowUnlockModal] = useState<GameZone | null>(null);
-  const [timeUntilLife, setTimeUntilLife] = useState<number | null>(null);
 
   useEffect(() => {
     setZoneProgress(getZoneProgress());
     setUnlockedZones(getUnlockedZones());
   }, []);
-
-  useEffect(() => {
-    if (!engagement) return;
-    const interval = setInterval(() => {
-      const time = getTimeUntilNextLife(engagement);
-      setTimeUntilLife(time);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [engagement]);
 
   const handleUnlockZone = (zone: GameZone) => {
     if (!engagement) return;
@@ -105,27 +96,20 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: G
       {/* Top Bar */}
       <div className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 px-4 md:px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3 md:gap-4">
-          {/* Lives */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200">
-            <Heart className="w-4 h-4 text-black fill-black" />
-            <span className="font-semibold text-black text-sm">{engagement?.lives ?? 5}</span>
-            {timeUntilLife && engagement && engagement.lives < engagement.maxLives && (
-              <span className="hidden md:inline text-xs text-gray-400 ml-1">
-                {formatTimeRemaining(timeUntilLife)}
-              </span>
-            )}
-          </div>
-          
-          {/* Coins */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200">
+          {/* Coins with Buy Button */}
+          <button 
+            onClick={onBuyCoins}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors group"
+          >
             <Coins className="w-4 h-4 text-black" />
-            <span className="font-semibold text-black text-sm">{engagement?.coins?.toLocaleString() ?? 100}</span>
-          </div>
+            <span className="font-semibold text-black text-sm">{engagement?.coins?.toLocaleString() ?? 500}</span>
+            <Plus className="w-3 h-3 text-gray-400 group-hover:text-[#0a33ff] transition-colors" />
+          </button>
 
           {/* Gems */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200">
             <Gem className="w-4 h-4 text-[#0a33ff]" />
-            <span className="font-semibold text-black text-sm">{engagement?.gems ?? 5}</span>
+            <span className="font-semibold text-black text-sm">{engagement?.gems ?? 10}</span>
           </div>
 
           {/* Streak */}
@@ -282,6 +266,8 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: G
                     const isLevelDone = zoneProgress[selectedZone.id]?.includes(level.id);
                     const isAccessible = isLevelUnlocked(selectedZone, index);
                     const isCurrent = isAccessible && !isLevelDone;
+                    const cost = LEVEL_COSTS[level.difficulty || "easy"];
+                    const canAfford = engagement ? canAffordLevel(engagement, level.difficulty || "easy") : false;
 
                     return (
                       <motion.button
@@ -296,7 +282,9 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: G
                           isLevelDone
                             ? "bg-black text-white border-black"
                             : isCurrent
-                              ? "bg-[#0a33ff] text-white border-[#0a33ff] shadow-lg"
+                              ? canAfford
+                                ? "bg-[#0a33ff] text-white border-[#0a33ff] shadow-lg"
+                                : "bg-gray-100 text-gray-400 border-gray-200"
                               : isAccessible
                                 ? "bg-white text-black border-gray-200 hover:border-gray-300"
                                 : "bg-gray-50 text-gray-300 border-gray-100"
@@ -304,15 +292,18 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: G
                       >
                         <span className="text-2xl font-bold">{level.levelNum}</span>
                         
-                        {isLevelDone && (
+                        {isLevelDone ? (
                           <span className="text-xs mt-1">✓</span>
+                        ) : isAccessible ? (
+                          <div className="flex items-center gap-0.5 mt-1">
+                            <Coins className="w-3 h-3" />
+                            <span className="text-xs font-medium">{cost}</span>
+                          </div>
+                        ) : (
+                          <Lock className="w-4 h-4 mt-1" />
                         )}
                         
-                        {!isAccessible && (
-                          <Lock className="w-4 h-4 absolute bottom-2" />
-                        )}
-                        
-                        {isCurrent && (
+                        {isCurrent && canAfford && (
                           <motion.div
                             animate={{ scale: [1, 1.2, 1] }}
                             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -324,6 +315,22 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: G
                       </motion.button>
                     );
                   })}
+                </div>
+
+                {/* Level Cost Legend */}
+                <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span>Easy: {LEVEL_COSTS.easy} coins</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                    <span>Medium: {LEVEL_COSTS.medium} coins</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <span>Hard: {LEVEL_COSTS.hard} coins</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -356,12 +363,15 @@ export function GameZoneMap({ engagement, onSelectLevel, onEngagementUpdate }: G
           <span className="text-[10px] font-semibold uppercase tracking-wide">Rewards</span>
         </Link>
         
-        <Link href="/achievements" className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+        <button 
+          onClick={onBuyCoins}
+          className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors"
+        >
           <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-50">
-            <Gem className="w-5 h-5" />
+            <Coins className="w-5 h-5" />
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wide">Awards</span>
-        </Link>
+          <span className="text-[10px] font-semibold uppercase tracking-wide">Shop</span>
+        </button>
       </div>
 
       {/* Unlock Modal */}
