@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn, shuffleArray } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import Image from "next/image";
@@ -34,30 +34,24 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
   const [lastMatch, setLastMatch] = useState<string | null>(null);
 
   useEffect(() => {
-    // Create shuffled cards from pairs
     const wordCards: CardData[] = pairs.map((pair, i) => ({
       id: `word-${i}`,
       type: "word",
       content: pair.word,
       pairId: `pair-${i}`,
     }));
-
     const imageCards: CardData[] = pairs.map((pair, i) => ({
       id: `image-${i}`,
       type: "image",
       content: pair.image,
       pairId: `pair-${i}`,
     }));
-
-    // Shuffle both sets
     setCards([...shuffleArray(wordCards), ...shuffleArray(imageCards)]);
   }, [pairs]);
 
   const handleCardClick = (card: CardData) => {
-    // Don't select already matched cards
     if (matchedPairs.includes(card.pairId)) return;
     
-    // Don't select the same card type as already selected
     if (selectedCard && selectedCard.type === card.type) {
       setSelectedCard(card);
       return;
@@ -66,42 +60,26 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
     if (!selectedCard) {
       setSelectedCard(card);
     } else {
-      // Check for match
       if (selectedCard.pairId === card.pairId) {
-        // Match!
         const newMatched = [...matchedPairs, card.pairId];
         setMatchedPairs(newMatched);
         setLastMatch(card.pairId);
         setSelectedCard(null);
+        confetti({ particleCount: 30, spread: 40, origin: { y: 0.6 }, colors: ["#0a33ff", "#000000"] });
+        setTimeout(() => setLastMatch(null), 400);
 
-        confetti({
-          particleCount: 40,
-          spread: 50,
-          origin: { y: 0.6 },
-        });
-
-        setTimeout(() => setLastMatch(null), 500);
-
-        // Check if all matched
         if (newMatched.length === pairs.length) {
           setShowSuccess(true);
-          confetti({
-            particleCount: 150,
-            spread: 100,
-            origin: { y: 0.5 },
-          });
-          setTimeout(() => {
-            onComplete(wrongAttempts === 0);
-          }, 2000);
+          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 }, colors: ["#0a33ff", "#000000"] });
+          setTimeout(() => onComplete(wrongAttempts === 0), 1500);
         }
       } else {
-        // Wrong match
         setWrongAttempts(prev => prev + 1);
         setShowWrong(true);
         setTimeout(() => {
           setShowWrong(false);
           setSelectedCard(null);
-        }, 500);
+        }, 400);
       }
     }
   };
@@ -114,60 +92,45 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
   const imageCards = cards.filter(c => c.type === "image");
 
   return (
-    <div className="relative w-full h-[100dvh] flex flex-col bg-gradient-to-b from-orange-50 via-red-50 to-pink-50 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-48 h-48 rounded-full bg-orange-200/30 blur-3xl" />
-        <div className="absolute top-40 right-10 w-64 h-64 rounded-full bg-red-200/30 blur-3xl" />
-        <div className="absolute bottom-20 left-1/4 w-40 h-40 rounded-full bg-pink-200/30 blur-2xl" />
-      </div>
-
+    <div className="relative w-full h-[100dvh] flex flex-col bg-white overflow-hidden">
       {/* Header */}
-      <div className="relative z-10 px-4 pt-4 pb-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl md:text-2xl font-black text-orange-600">🏔️ Word Match</h2>
-          <span className="text-sm font-bold text-gray-500 bg-white/80 px-3 py-1 rounded-full">
-            {matchedPairs.length}/{pairs.length} matched
-          </span>
+      <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-bold text-black">Word Match</h2>
+          <span className="text-sm font-medium text-gray-500">{matchedPairs.length}/{pairs.length}</span>
         </div>
-
-        {/* Progress */}
-        <div className="mt-2 h-2 bg-white/50 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-orange-500 to-red-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${(matchedPairs.length / pairs.length) * 100}%` }}
-          />
+        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-black transition-all" style={{ width: `${(matchedPairs.length / pairs.length) * 100}%` }} />
         </div>
       </div>
 
       {/* Game Area */}
-      <div className="relative z-10 flex-grow flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 px-4 py-4 overflow-auto">
-        {/* Words Column */}
-        <div className="flex flex-wrap md:flex-col gap-2 md:gap-3 justify-center">
-          <h3 className="w-full text-center text-sm font-black text-gray-500 mb-1">WORDS</h3>
+      <div className="flex-grow flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 px-4 py-6 overflow-auto">
+        {/* Words */}
+        <div className="flex flex-wrap md:flex-col gap-2 justify-center">
+          <p className="w-full text-center text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Words</p>
           {wordCards.map((card) => (
             <motion.button
               key={card.id}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ 
                 opacity: 1, 
                 x: 0,
-                scale: isCardJustMatched(card) ? [1, 1.1, 1] : 1,
+                scale: isCardJustMatched(card) ? [1, 1.05, 1] : 1,
               }}
-              whileHover={!isCardMatched(card) ? { scale: 1.05 } : {}}
-              whileTap={!isCardMatched(card) ? { scale: 0.95 } : {}}
+              transition={{ ease: "easeOut" }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handleCardClick(card)}
               disabled={isCardMatched(card)}
               className={cn(
-                "px-4 py-3 md:px-6 md:py-4 rounded-xl md:rounded-2xl font-black text-base md:text-lg transition-all shadow-lg min-w-[80px] md:min-w-[120px]",
+                "px-5 py-3 rounded-xl font-semibold transition-all min-w-[100px]",
                 isCardMatched(card)
-                  ? "bg-green-100 text-green-600 border-2 border-green-300"
+                  ? "bg-black text-white"
                   : isCardSelected(card)
-                    ? "bg-orange-500 text-white ring-4 ring-orange-200"
+                    ? "bg-[#0a33ff] text-white"
                     : showWrong && isCardSelected(card)
-                      ? "bg-red-500 text-white animate-shake"
-                      : "bg-white text-gray-700 hover:bg-orange-50 border-2 border-gray-200"
+                      ? "bg-gray-300"
+                      : "bg-gray-100 text-black hover:bg-gray-200"
               )}
             >
               {isCardMatched(card) && <Check className="w-4 h-4 inline mr-1" />}
@@ -177,45 +140,38 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
         </div>
 
         {/* Divider */}
-        <div className="hidden md:block w-px h-64 bg-gray-200" />
+        <div className="hidden md:block w-px h-48 bg-gray-200" />
         <div className="md:hidden w-full h-px bg-gray-200" />
 
-        {/* Images Column */}
-        <div className="flex flex-wrap md:flex-col gap-2 md:gap-3 justify-center">
-          <h3 className="w-full text-center text-sm font-black text-gray-500 mb-1">PICTURES</h3>
+        {/* Images */}
+        <div className="flex flex-wrap md:flex-col gap-2 justify-center">
+          <p className="w-full text-center text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Pictures</p>
           {imageCards.map((card) => (
             <motion.button
               key={card.id}
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 10 }}
               animate={{ 
                 opacity: 1, 
                 x: 0,
-                scale: isCardJustMatched(card) ? [1, 1.1, 1] : 1,
+                scale: isCardJustMatched(card) ? [1, 1.05, 1] : 1,
               }}
-              whileHover={!isCardMatched(card) ? { scale: 1.05 } : {}}
-              whileTap={!isCardMatched(card) ? { scale: 0.95 } : {}}
+              transition={{ ease: "easeOut" }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handleCardClick(card)}
               disabled={isCardMatched(card)}
               className={cn(
-                "w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden transition-all shadow-lg relative",
+                "w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden transition-all relative border-2",
                 isCardMatched(card)
-                  ? "ring-4 ring-green-400"
+                  ? "border-black"
                   : isCardSelected(card)
-                    ? "ring-4 ring-orange-400"
-                    : showWrong && isCardSelected(card)
-                      ? "ring-4 ring-red-500 animate-shake"
-                      : "ring-2 ring-gray-200 hover:ring-orange-300"
+                    ? "border-[#0a33ff]"
+                    : "border-gray-200 hover:border-gray-300"
               )}
             >
-              <Image
-                src={card.content}
-                alt="Match image"
-                fill
-                className="object-cover"
-              />
+              <Image src={card.content} alt="Match" fill className="object-cover" />
               {isCardMatched(card) && (
-                <div className="absolute inset-0 bg-green-500/30 flex items-center justify-center">
-                  <Check className="w-8 h-8 text-white drop-shadow-lg" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <Check className="w-6 h-6 text-white" />
                 </div>
               )}
             </motion.button>
@@ -224,17 +180,12 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
       </div>
 
       {/* Instructions */}
-      <div className="relative z-10 text-center py-3 px-4 bg-white/50 backdrop-blur-sm">
-        <p className="text-sm text-gray-500 font-medium">
+      <div className="text-center py-3 px-4 border-t border-gray-100">
+        <p className="text-sm text-gray-500">
           {selectedCard 
-            ? `Now tap the matching ${selectedCard.type === "word" ? "picture" : "word"}!`
-            : "Tap a word or picture to start matching"}
+            ? `Tap the matching ${selectedCard.type === "word" ? "picture" : "word"}`
+            : "Tap to match words with pictures"}
         </p>
-        {wrongAttempts > 0 && (
-          <p className="text-xs text-red-500 font-bold mt-1">
-            {wrongAttempts} wrong attempt{wrongAttempts > 1 ? "s" : ""}
-          </p>
-        )}
       </div>
 
       {/* Success Overlay */}
@@ -244,19 +195,13 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", damping: 15 }}
-              className="text-center"
-            >
-              <Sparkles className="w-20 h-20 text-orange-500 mx-auto mb-4" />
-              <h2 className="text-4xl font-black text-orange-600">ALL MATCHED!</h2>
-              <p className="text-gray-500 font-bold mt-2">
-                {wrongAttempts === 0 ? "Perfect matching! 🎯" : `Matched all ${pairs.length} pairs!`}
-              </p>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center">
+              <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-black">All Matched!</h2>
             </motion.div>
           </motion.div>
         )}
@@ -264,4 +209,3 @@ export function MatchGame({ pairs, onComplete }: MatchGameProps) {
     </div>
   );
 }
-
