@@ -9,7 +9,8 @@ import {
   ChevronRight, 
   ChevronLeft,
   User,
-  LayoutDashboard
+  LayoutDashboard,
+  Gift
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export function Sidebar() {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Game", href: "/dashboard" },
+    { icon: Gift, label: "Daily Rewards", href: "/rewards" },
     { icon: Trophy, label: "Achievements", href: "/achievements" },
     { icon: User, label: "Profile", href: "/profile" },
     { icon: Settings, label: "Settings", href: "/settings" },

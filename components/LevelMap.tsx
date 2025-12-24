@@ -2,15 +2,24 @@
 
 import { LEVELS } from "@/data/levels";
 import { cn } from "@/lib/utils";
+import { 
+  getCurrentEvent, 
+  isDailyRewardAvailable, 
+  formatTimeRemaining, 
+  getTimeUntilNextLife,
+  EngagementState 
+} from "@/lib/engagement";
 import { motion } from "framer-motion";
-import { Star, Heart, Trophy, ShoppingBag, Calendar, Map as MapIcon, Settings } from "lucide-react";
+import { Star, Heart, Trophy, Gift, Calendar, Map as MapIcon, Settings, Flame, Clock, Coins, Gem, Zap, Sparkles } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 interface LevelMapProps {
   completedLevels: number[];
   onSelectLevel: (level: number) => void;
   scrollToLevel?: number | null;
+  engagement?: EngagementState | null;
 }
 
 const LEVEL_POSITIONS = [
@@ -26,9 +35,22 @@ const LEVEL_POSITIONS = [
   { x: 50, y: 15 }, // Level 10
 ];
 
-export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: LevelMapProps) => {
+export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel, engagement }: LevelMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const levelRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const [timeUntilLife, setTimeUntilLife] = useState<number | null>(null);
+
+  // Timer for life regeneration display
+  useEffect(() => {
+    if (!engagement) return;
+    
+    const interval = setInterval(() => {
+      const time = getTimeUntilNextLife(engagement);
+      setTimeUntilLife(time);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [engagement]);
 
   useEffect(() => {
     if (scrollToLevel && levelRefs.current[scrollToLevel]) {
@@ -62,36 +84,129 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
     }
   }, [scrollToLevel]);
 
+  const currentEvent = engagement ? getCurrentEvent(engagement) : null;
+  const canClaimDaily = engagement ? isDailyRewardAvailable(engagement) : false;
+
   return (
     <div ref={containerRef} className="relative w-full h-full min-h-[1400px] bg-[#fdf5cc] overflow-hidden flex flex-col">
       {/* Background Texture Overlay */}
       <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #f97316 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       
-      {/* Top Bar */}
-      <div className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-pink-50 px-4 py-2 rounded-full border border-pink-100 shadow-sm">
-            <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
-            <span className="font-black text-pink-600">5</span>
-            <span className="text-xs font-bold text-pink-400 uppercase">Full</span>
+      {/* Top Bar with Engagement Stats */}
+      <div className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+          {/* Lives */}
+          <div className="flex items-center gap-1.5 md:gap-2 bg-pink-50 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-pink-100 shadow-sm">
+            <Heart className="w-4 h-4 md:w-5 md:h-5 text-pink-500 fill-pink-500" />
+            <span className="font-black text-pink-600 text-sm md:text-base">{engagement?.lives ?? 5}</span>
+            {timeUntilLife && engagement && engagement.lives < engagement.maxLives && (
+              <div className="hidden md:flex items-center gap-1 text-xs text-pink-400">
+                <Clock className="w-3 h-3" />
+                {formatTimeRemaining(timeUntilLife)}
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-full border border-yellow-100 shadow-sm">
-            <div className="w-5 h-5 bg-yellow-400 rounded-sm rotate-45 flex items-center justify-center shadow-inner">
-                <div className="w-2 h-2 bg-yellow-600 rounded-full" />
-            </div>
-            <span className="font-black text-yellow-600">587</span>
+          
+          {/* Coins */}
+          <div className="flex items-center gap-1.5 md:gap-2 bg-yellow-50 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-yellow-100 shadow-sm">
+            <Coins className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
+            <span className="font-black text-yellow-600 text-sm md:text-base">{engagement?.coins?.toLocaleString() ?? 100}</span>
           </div>
+
+          {/* Gems */}
+          <div className="hidden sm:flex items-center gap-1.5 md:gap-2 bg-purple-50 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-purple-100 shadow-sm">
+            <Gem className="w-4 h-4 md:w-5 md:h-5 text-purple-500" />
+            <span className="font-black text-purple-600 text-sm md:text-base">{engagement?.gems ?? 5}</span>
+          </div>
+
+          {/* Streak - FOMO element */}
+          {engagement && engagement.currentStreak > 0 && (
+            <motion.div 
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-orange-100 to-red-100 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-orange-200 shadow-sm"
+            >
+              <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+              <span className="font-black text-orange-600 text-sm md:text-base">{engagement.currentStreak}</span>
+              <span className="hidden md:inline text-xs font-bold text-orange-400">day streak!</span>
+            </motion.div>
+          )}
         </div>
         
-        <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full border-2 border-blue-400 overflow-hidden bg-white shadow-sm">
-                <Image src="https://api.dicebear.com/7.x/adventurer/svg?seed=avatar" alt="profile" width={40} height={40} />
-            </div>
-            <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
-                <Settings className="w-6 h-6 text-gray-400" />
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Daily Reward Indicator - FOMO */}
+          {canClaimDaily && (
+            <Link href="/rewards">
+              <motion.div 
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                className="relative w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+              >
+                <Gift className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-red-500 rounded-full flex items-center justify-center text-[8px] md:text-[10px] text-white font-black border-2 border-white animate-pulse">
+                  !
+                </div>
+              </motion.div>
+            </Link>
+          )}
+
+          <div className="w-9 h-9 md:w-10 md:h-10 rounded-full border-2 border-blue-400 overflow-hidden bg-white shadow-sm">
+            <Image src="https://api.dicebear.com/7.x/adventurer/svg?seed=avatar" alt="profile" width={40} height={40} />
+          </div>
+          <Link href="/settings">
+            <button className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
+              <Settings className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
             </button>
+          </Link>
         </div>
       </div>
+
+      {/* Limited-Time Event Banner - Maximum FOMO */}
+      {currentEvent && (
+        <motion.div
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="relative z-40 mx-4 mt-4 rounded-2xl overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500" />
+          <motion.div
+            animate={{ x: ["-100%", "100%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+          />
+          <div className="relative px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{currentEvent.emoji}</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white font-black text-sm md:text-base">{currentEvent.name}</span>
+                  <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                    LIMITED TIME
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-white/80 text-xs">
+                  <Clock className="w-3 h-3" />
+                  <span>Ends in {formatTimeRemaining(currentEvent.timeRemaining)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-white font-black">{currentEvent.progress}/{currentEvent.target}</div>
+              <Link href="/rewards" className="text-white/80 text-xs hover:text-white flex items-center gap-1">
+                View <Sparkles className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+          {/* Progress bar */}
+          <div className="h-1.5 bg-white/20">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${(currentEvent.progress / currentEvent.target) * 100}%` }}
+              className="h-full bg-white"
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* Map Content */}
       <div className="flex-grow relative w-full max-w-2xl mx-auto py-20 px-4 overflow-visible">
@@ -190,6 +305,15 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
                       <span className="text-xl">🔒</span>
                     </div>
                   )}
+
+                  {/* Pulse effect for current level */}
+                  {isCurrent && (
+                    <motion.div
+                      animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="absolute inset-0 bg-pink-400 rounded-full"
+                    />
+                  )}
                 </div>
 
                 {/* Stars below the node */}
@@ -215,6 +339,17 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
                     className="absolute -top-12 lg:-top-16 w-12 h-12 lg:w-16 lg:h-16 rounded-2xl border-4 border-white overflow-hidden bg-white shadow-2xl z-30"
                   >
                     <Image src="https://api.dicebear.com/7.x/adventurer/svg?seed=avatar" alt="current" fill className="object-cover" />
+                  </motion.div>
+                )}
+
+                {/* "Play!" tooltip for current level */}
+                {isCurrent && !scrollToLevel && (
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="absolute -bottom-8 bg-pink-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg"
+                  >
+                    PLAY!
                   </motion.div>
                 )}
               </motion.button>
@@ -256,28 +391,37 @@ export const LevelMap = ({ completedLevels, onSelectLevel, scrollToLevel }: Leve
       </div>
 
       {/* Bottom Nav Bar */}
-      <div className="sticky bottom-0 z-50 w-full bg-white border-t border-gray-100 px-8 py-4 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="sticky bottom-0 z-50 w-full bg-white border-t border-gray-100 px-4 md:px-8 py-3 md:py-4 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <button className="flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-pink-500 group-hover:bg-pink-200 transition-colors">
-                <MapIcon className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-black text-pink-500 uppercase tracking-widest">Map</span>
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-pink-100 flex items-center justify-center text-pink-500 group-hover:bg-pink-200 transition-colors">
+            <MapIcon className="w-5 h-5 md:w-6 md:h-6" />
+          </div>
+          <span className="text-[10px] font-black text-pink-500 uppercase tracking-widest">Map</span>
         </button>
-        <button className="flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors relative">
-                <Calendar className="w-6 h-6" />
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-black border-2 border-white">2</div>
-            </div>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Events</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 group">
-            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors">
-                <ShoppingBag className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Shop</span>
-        </button>
+        
+        <Link href="/rewards" className="flex flex-col items-center gap-1 group relative">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors relative">
+            <Gift className="w-5 h-5 md:w-6 md:h-6" />
+            {canClaimDaily && (
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-red-500 rounded-full flex items-center justify-center text-[8px] md:text-[10px] text-white font-black border-2 border-white"
+              >
+                !
+              </motion.div>
+            )}
+          </div>
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600">Rewards</span>
+        </Link>
+        
+        <Link href="/achievements" className="flex flex-col items-center gap-1 group">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors">
+            <Trophy className="w-5 h-5 md:w-6 md:h-6" />
+          </div>
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600">Trophies</span>
+        </Link>
       </div>
     </div>
   );
 };
-
